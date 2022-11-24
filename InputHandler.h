@@ -12,7 +12,7 @@ public:
 	InputHandler();
 	~InputHandler();
 
-	void StartReading();
+	int StartReading();
 
 private:
 	static const std::regex M_C_DATE_REG_EXP;
@@ -20,6 +20,8 @@ private:
 	TasksManager m_tasksManager;
 
 	bool HandleAdd(const std::string_view& inpView);
+	bool HandleDone(const std::string_view& inpView);
+	bool HandleUpdate(const std::string_view& inpView);
 
 	std::vector<std::string_view> SplitIntoWords(const std::string_view& inpView);
 

@@ -1,6 +1,7 @@
 #include "InputHandler.h"
 
 #include <iostream>
+#include <exception>
 
 const std::regex InputHandler::M_C_DATE_REG_EXP("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}");
 
@@ -14,12 +15,8 @@ InputHandler::~InputHandler()
 
 }
 
-void InputHandler::StartReading()
+int InputHandler::StartReading()
 {
-	const int NAME_INDX = 0;
-	const int DATE_INDX = 2;
-	const int ADD_FIELDS_CNT = 4;
-
 	std::cout << "Enter command: ";
 	
 	std::string inputLine;
@@ -33,63 +30,134 @@ void InputHandler::StartReading()
 			break;
 		}
 
-		size_t first = 0;
-		size_t second = inpLineView.find_first_of(" ", first);
-		if (second == std::string_view::npos)
+		try
 		{
-			std::cout << "Invalid input!\n"
-				      << "Enter command: ";
+			size_t first = 0;
+		    size_t second = inpLineView.find_first_of(" ", first);
+		    if (second == std::string_view::npos)
+		    {
+				throw "Invalid input!";
+		    }
+		    
+			std::string_view cmdPartView( inpLineView.substr(first, second - first) );
+		    
+		    first = second + 1;
+		    second = inpLineView.size();
+		    
+			std::string_view argsPartView( inpLineView.substr(first, second - first) );
+			
+			if (cmdPartView == "add")
+			{
+				HandleAdd(argsPartView);
+			}
+			else if (cmdPartView == "done")
+			{
+				HandleDone(argsPartView);
+			}
+			else if (cmdPartView == "update")
+			{
+
+			}
+			else if (cmdPartView == "delete")
+			{
+
+			}
+			else if (cmdPartView == "select")
+			{
+
+			}
+			else
+			{
+				throw "Incorrect command!";
+			}
+
+			std::cout << "Enter command: ";
+		}
+		catch (const char* msg)
+		{
+			std::cout << msg << std::endl;
+			std::cout << "Enter command: ";
 			continue;
 		}
-
-		std::string_view cmdPartView( inpLineView.substr(first, second - first) );
-
-		first = second + 1;
-		second = inpLineView.size();
-
-		std::string_view argsPartView( inpLineView.substr(first, second - first) );
-
-		if (cmdPartView == "add")
+		catch (...)
 		{
-			std::vector<std::string_view> argWords(SplitIntoWords(argsPartView));
-
-			if (argWords.size() != ADD_FIELDS_CNT)
-			{
-				std::cout << "Too few arguments!\n"
-					<< "Enter command: " << std::endl;
-				continue;
-			}
-
-			if (!DateFormatIsCorrect(Unquoted(argWords[DATE_INDX])))
-			{
-				std::cout << "Date format is incorrect! Suitable date format: \"yyyy-mm-dd hh:mm\"\n"
-					<< "Enter command: " << std::endl;
-				continue;
-			}
-
-			std::cout << "Everything is correct" << std::endl;
+			std::cout << "Unexpected error occured!";
+			return -1;
 		}
-		else if (cmdPartView == "done")
-		{
-
-		}
-		else if (cmdPartView == "update")
-		{
-
-		}
-		else if (cmdPartView == "delete")
-		{
-
-		}
-		else if (cmdPartView == "select")
-		{
-
-		}
-		else
-			std::cout << "Incorrect command!" << std::endl;
-
-		std::cout << "Enter command: ";
 	}
+
+	return 0;
+}
+
+bool InputHandler::HandleAdd(const std::string_view& inpView)
+{
+	const int NAME_INDX = 0;
+	const int DATE_INDX = 2;
+	const int REQUIRED_FIELDS_NUM = 4;
+
+	std::vector<std::string_view> argWords( SplitIntoWords(inpView) );
+
+	if (argWords.size() != REQUIRED_FIELDS_NUM)
+	{
+		throw "Incorrect number of arguments!";
+		return false;
+	}
+	else if ( !DateFormatIsCorrect( Unquoted(argWords[DATE_INDX])) )
+	{
+		throw "Date format is incorrect! Suitable date format: \"yyyy-mm-dd hh:mm\".";
+		return false;
+	}
+	else if ( m_tasksManager.ContainsTask(Unquoted(argWords[NAME_INDX])) )
+	{
+		throw "This task already exists!";
+		return false;
+	}
+	
+	m_tasksManager.AddTask(argWords[0], argWords[1], argWords[2], argWords[3]);
+
+	return true;
+}
+
+bool InputHandler::HandleDone(const std::string_view& inpView)
+{
+	const int REQUIRED_FIELDS_NUM = 1;
+
+	std::vector<std::string_view> argWords( SplitIntoWords(inpView) );
+	
+	if (argWords.size() != REQUIRED_FIELDS_NUM)
+	{
+		throw "Incorrect number of arguments!";
+		return false;
+	}
+	else if ( !m_tasksManager.ContainsTask(Unquoted(argWords[0])) )
+	{
+		throw "No such task!";
+		return false;
+	}
+	
+	m_tasksManager.SetTaskDone( Unquoted(argWords[0]) );
+
+	return true;
+}
+
+bool InputHandler::HandleUpdate(const std::string_view& inpView)
+{
+	const int REQUIRED_FIELDS_NUM = 1;
+
+	std::vector<std::string_view> argWords(SplitIntoWords(inpView));
+
+	if (argWords.size() != REQUIRED_FIELDS_NUM)
+	{
+		throw "Incorrect number of arguments!";
+		return false;
+	}
+	else if ( !m_tasksManager.ContainsTask(Unquoted(argWords[0])))
+	{
+		throw "No such task!";
+		return false;
+	}
+
+	return true;
 }
 
 std::vector<std::string_view> InputHandler::SplitIntoWords(const std::string_view& inpView)

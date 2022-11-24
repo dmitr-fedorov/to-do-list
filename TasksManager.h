@@ -9,10 +9,15 @@ class TasksManager
 {
 public:
 	TasksManager();
+
 	~TasksManager();
 
-	void AddTask(std::string& name, std::string& descr, std::string& date, std::string& categ);
-	bool ContainsTask(std::string& name);
+	void AddTask(const std::string_view& name, const std::string_view& descr,
+		const std::string_view& date, const std::string_view& categ);
+
+	bool ContainsTask(const std::string_view& name);
+
+	void SetTaskDone(const std::string_view& name);
 
 private:
 	std::map<std::string, Task> m_tasks;

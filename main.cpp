@@ -4,7 +4,5 @@ int main()
 {
 	InputHandler inpHandler;
 
-	inpHandler.StartReading();
-
-	return 0;
+	return inpHandler.StartReading();
 }
