@@ -13,9 +13,18 @@ public:
 	~TasksManager();
 
 	void AddTask(const std::string_view& name, const std::string_view& descr,
-		const std::string_view& date, const std::string_view& categ);
+		         const std::string_view& date, const std::string_view& categ);
 
-	bool ContainsTask(const std::string_view& name);
+	void UpdateTask(const std::string_view& name, const std::string_view& descr,
+		            const std::string_view& date, const std::string_view& categ);
+
+	void ReplaceTask(const std::string_view& oldName, const std::string_view& newName,
+		             const std::string_view& descr,   const std::string_view& date,
+		             const std::string_view& categ);
+
+	void DeleteTask(const std::string_view& name);
+
+	bool ContainsTask(const std::string_view& name) const;
 
 	void SetTaskDone(const std::string_view& name);
 

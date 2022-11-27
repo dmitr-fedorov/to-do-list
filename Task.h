@@ -3,21 +3,23 @@
 #include <string>
 #include <string_view>
 
+enum TaskStatus
+{
+	InProgress,
+	Done,  	
+};
+
 class Task
 {
 public:
-	enum TaskStatus
-    {
-    	Done,
-    	InProgress
-    };
-
 	Task(const std::string_view& name, const std::string_view& descr,
 		const std::string_view& date, const std::string_view& categ);
 	~Task();
 
-	TaskStatus CompletionStatus();
+	TaskStatus GetCompletionStatus() const;
 	void SetDone();
+	void Update(const std::string_view& descr, const std::string_view& date,
+		const std::string_view& categ);
 
 private:	
 	std::string m_name;
