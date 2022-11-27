@@ -30,6 +30,8 @@ int InputHandler::StartReading()
 		try
 		{
 			const auto commandAndArguments = GetCommandAndArguments(inputLine);
+
+			// Ссылки сделаны для удобства
 			const std::string_view& cmdPartView = commandAndArguments.first;
 			const std::string_view& argsPartView = commandAndArguments.second;
 
@@ -72,8 +74,10 @@ int InputHandler::StartReading()
 
 void InputHandler::HandleAdd(const std::string_view& argsView)
 {	
+	// Колличество необходимых аргументов
 	static const int NUM_REQUIRED_ARGS = 4;
 
+	// Индексы аргументов
 	static const int INDX_NAME        = 0;
 	static const int INDX_DESCRIPTION = 1;
 	static const int INDX_DATE        = 2;
@@ -130,6 +134,7 @@ void InputHandler::HandleDone(const std::string_view& argsView)
 
 void InputHandler::HandleUpdate(const std::string_view& argsView)
 {
+	// Индексы аргументов
 	static const int INDX_NAME        = 0;
 	static const int INDX_DESCRIPTION = 1;
 	static const int INDX_DATE        = 2;
