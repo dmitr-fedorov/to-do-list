@@ -65,6 +65,9 @@ private:
 	  argsView - аргументы команды.
 	*/
 	void HandleDelete(const std::string_view& argsView);
+
+	void HandleSelect(const std::string_view& argsView);
+
 	/*
 	  Возвращает пару, где первое значение - строка с командой,
 	  а второе значение - строка с аргументами этой команды.
@@ -99,10 +102,29 @@ private:
 	  argNameView - вид на строку с именем задачи, для которой считывается новое имя.
 	*/
 	std::string ReadName(const std::string_view& argNameView);
+
 	/*
 	  Выводит в консоль приглашение на ввод даты создания задачи, считывает и анализирует ввод.
 	  Выводит в консоль сообщения о некорректном вводе даты, если она была введена неправильно.
 	  Возвращает введенную строку, если она соответствует требованиям.
 	*/
 	std::string ReadDate();
+
+	/*
+	  Анализирует предикат predView.
+	  Возвращает пару, где first - имя поля, по которому нужно проводить поиск,
+	  second.first - оператор, относящийся к полю,
+	  second.second - значение, по которому производится проверка поля
+	*/
+	std::map<std::string, std::pair<std::string, std::string>>
+		AnalyzePredicate(const std::string_view& predView);
+
+	void ReadSelectOperator(const std::string_view& predView,
+		std::pair<std::string, std::pair<std::string, std::string>>& pr, size_t& i, size_t& j);
+
+	std::string ReadSelectValue(const std::string_view& predView, size_t& i);
+
+	size_t SkipUntilPredicate(const std::string_view& argsView);
+	size_t SkipUntilStar(const std::string_view& argsView, const size_t& startPos);
+	size_t SkipUntilWhere(const std::string_view& argsView, const size_t& startPos);
 };

@@ -1,6 +1,7 @@
 #include "TasksManager.h"
 
 #include <string_view>
+#include <array>
 
 TasksManager::TasksManager()
 {
@@ -66,4 +67,51 @@ void TasksManager::SetTaskDone(const std::string_view& name)
 
 	if (it != m_tasks.end())
 		it->second.SetDone();
+}
+
+std::vector<std::pair<std::string, Task>>
+TasksManager::SearchTasks(std::map<std::string, std::pair<std::string, std::string>>& searchMap)
+{
+	std::vector<std::pair<std::string, Task>> retVec;
+
+	for (std::pair<const std::string, Task>& taskPair : m_tasks)
+	{
+		for (const std::pair<std::string, std::pair<std::string, std::string>>& searchPair : searchMap)
+		{
+			const std::string& field = searchPair.first;
+			const std::string& op = searchPair.second.first;
+			const std::string& value = searchPair.second.second;
+
+			if (field == "name")
+			{
+				if (!taskPair.second.NameIs(op, value))
+					break;
+			}
+			else if (field == "description")
+			{
+				if (!taskPair.second.DescriptionIs(op, value))
+					break;
+			}
+			else if (field == "date")
+			{
+				if (!taskPair.second.DateIs(op, value))
+					break;
+			}
+			else if (field == "category")
+			{
+				if (!taskPair.second.CategoryIs(op, value))
+					break;
+			}
+			else if (field == "status")
+			{
+				if (!taskPair.second.StatusIs(op, value))
+					break;
+			}
+
+			if(searchMap.find(searchPair.first) == std::prev(searchMap.end()))
+				retVec.push_back(taskPair);
+		}
+	}
+
+	return retVec;
 }

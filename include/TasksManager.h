@@ -2,6 +2,8 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <utility>
 
 #include "Task.h"
 
@@ -54,6 +56,13 @@ public:
 	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной. 
 	*/
 	void SetTaskDone(const std::string_view& name);
+
+	/*
+	  Производит отбор задач по требованиям, указанным в searchMap.
+	  Возвращает пару из имени подходящей задачи и самой задачи.
+	*/
+	std::vector<std::pair<std::string, Task>>
+		SearchTasks(std::map<std::string, std::pair<std::string, std::string>>& searchMap);
 
 private:
 	// Контейнер с задачами

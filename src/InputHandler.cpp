@@ -1,6 +1,8 @@
 #include "InputHandler.h"
 
 #include <iostream>
+#include <sstream>
+#include <array>
 
 const std::regex InputHandler::M_CONST_DATE_REGEX("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}");
 const std::string InputHandler::M_CONST_STRING_EXIT = "q";
@@ -53,7 +55,7 @@ int InputHandler::StartReading()
 			}
 			else if (cmdPartView == "select")
 			{
-
+				HandleSelect(argsPartView);
 			}
 			else
 			{
@@ -157,13 +159,13 @@ void InputHandler::HandleUpdate(const std::string_view& argsView)
 
 		newFields.push_back(ReadName(unquotedArgs));
 
-		std::cout << "Description: ";
+		std::cout << "description: ";
 		std::getline(std::cin, inputLine, '\n');
 		newFields.push_back(inputLine);
 
 		newFields.push_back(ReadDate());
 
-		std::cout << "Category: ";
+		std::cout << "category: ";
 		std::getline(std::cin, inputLine, '\n');
 		newFields.push_back(inputLine);
 
@@ -201,6 +203,27 @@ void InputHandler::HandleDelete(const std::string_view& argsView)
 	catch (const char* msg)
 	{
 		std::cout << msg << std::endl;
+		return;
+	}
+}
+
+void InputHandler::HandleSelect(const std::string_view& argsView)
+{
+	try
+	{
+		size_t i = SkipUntilPredicate(argsView);
+
+		auto searchMap( AnalyzePredicate(argsView.substr(i, argsView.size())) );
+		
+		auto vec(m_tasksManager.SearchTasks(searchMap));
+		for (const auto elRef : vec)
+		{
+			elRef.second.Display(std::cout);
+		}
+	}
+	catch (const char* msg)
+	{
+		std::cout <<  msg << std::endl;
 		return;
 	}
 }
@@ -302,7 +325,7 @@ std::string InputHandler::ReadName(const std::string_view& argNameView)
 {
 	std::string inputLine;
 
-	std::cout << "Name: ";
+	std::cout << "name: ";
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
@@ -323,6 +346,13 @@ std::string InputHandler::ReadName(const std::string_view& argNameView)
 			std::cout << "Try again: ";
 			continue;
 		}
+		else if (Unquoted(inputLine).find('\"') != Unquoted(inputLine).npos)
+		{
+			std::cout << Unquoted(inputLine) << std::endl;
+			std::cout << "Redundant quotes are not allowed in name!" << std::endl;
+			std::cout << "Try again: ";
+			continue;
+		}
 		else
 		{
 			break;
@@ -336,7 +366,7 @@ std::string InputHandler::ReadDate()
 {
 	std::string inputLine;
 
-	std::cout << "Creation date: ";
+	std::cout << "date: ";
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
@@ -352,4 +382,259 @@ std::string InputHandler::ReadDate()
 	}
 
 	return inputLine;
+}
+
+std::map<std::string, std::pair<std::string, std::string>>
+InputHandler::AnalyzePredicate(const std::string_view& predView)
+{
+	std::map<std::string, std::pair<std::string, std::string>> retMap;
+	std::pair <std::string, std::pair<std::string, std::string>> tmpPair;
+
+	size_t end = predView.length();
+	size_t i = 0;
+
+	while (i < end)
+	{
+		if (predView[i] == ' ')
+		{
+			i++;
+			continue;
+		}
+		else if (predView[i] == '<' || predView[i] == '=' || predView[i] == '>' || predView[i] == '"')
+		{
+			throw "Incorrect predicate!";
+		}
+		else
+		{
+			for (size_t j = i; j < end; j++)
+			{
+				if (predView[j] == ' ')
+				{
+					auto tmp = predView.substr(i, j - i);
+
+					if (tmp == "and")
+					{
+						if (retMap.empty())    // Если and идет первым словом в предикате
+							throw "The word \"and\" should not be the first word in predicate!";
+						else
+						{
+							i = j + 1;
+							break;        // Начать чтение следующего слова
+						}
+					}
+					else if (tmp == "like")
+					{
+						if (tmpPair.first.empty())    // Если like идет первым словом в предикате
+							throw "Incorrect usage of word \"like\"!";
+						
+						tmpPair.second.first = tmp;
+						i = j + 1;
+						tmpPair.second.second = ReadSelectValue(predView, i);
+					}
+					else
+					{
+						tmpPair.first = tmp;
+						ReadSelectOperator(predView, tmpPair, i, j);						
+					}
+
+					auto res = predView.find_first_not_of(' ', i);
+					if (res != std::string_view::npos)
+					{
+						auto res2 = predView.find_first_of(' ', res);
+						if (res2 != std::string_view::npos)
+							if (predView.substr(res, res2 - res) != "and")
+								throw "Incorrect predicate!";
+					}
+
+					if (!retMap.emplace(tmpPair).second)
+						throw "You cannot enter one field several times in predicate!";
+					break;
+				}
+				else if (predView[j] == '<' || predView[j] == '=' || predView[j] == '>')
+				{
+					tmpPair.first = predView.substr(i, j);
+					tmpPair.second.first = predView[j];
+					i = j + 1;
+					tmpPair.second.second = Unquoted(ReadSelectValue(predView, i));
+					if (!retMap.emplace(tmpPair).second)
+						throw "You cannot enter one field several times in predicate!";
+					break;
+				}
+			}	
+		}
+	}
+
+	return retMap;	
+}
+
+void InputHandler::ReadSelectOperator(const std::string_view& predView,
+	std::pair<std::string, std::pair<std::string, std::string>>& pr, size_t& i, size_t& j)
+{
+	auto end = predView.size();
+
+	auto res = predView.find_first_not_of(' ', j);
+	if (res != std::string_view::npos && res < end)
+	{
+		if (predView[res] == 'l')
+		{
+			auto res2 = predView.find_first_of(' ', res);
+
+			auto strv = predView.substr(res, res2 - res);
+
+			if (strv == "like")
+			{
+				pr.second.first = strv;
+				i = res + (res2 - res);
+				pr.second.second = ReadSelectValue(predView, i);
+			}
+		}
+		else if (predView[res] == '<' || predView[res] == '=' || predView[res] == '>')
+		{
+			if (predView[res + 1] == '<' || predView[res + 1] == '=' || predView[res + 1] == '>')
+			{
+				pr.second.first = predView.substr(res, 2);
+				i = res + 2;
+				pr.second.second = ReadSelectValue(predView, i);
+			}
+			else
+			{
+				pr.second.first = predView[res];
+				i = res + 1;
+				pr.second.second = ReadSelectValue(predView, i);
+			}
+		}
+		else
+			throw "incorrect predicate!";
+	}
+	else
+	{
+		throw "Incorrect predicate!";
+	}
+}
+
+std::string InputHandler::ReadSelectValue(const std::string_view& predView, size_t& i)
+{
+	auto res = predView.find_first_not_of(' ', i);
+	auto end = predView.size();
+
+	std::string retStr;
+
+	if (res != std::string_view::npos)
+	{
+		if (predView[res] != '\"')
+		{
+			throw "Incorrect predicate!";
+		}
+		
+		auto res2 = predView.find_first_of('\"', res + 1);
+
+		if (res2 == std::string_view::npos)
+		{
+			throw "Incorrect predicate!";
+		}
+
+		retStr = predView.substr(res, res2 - res + 1);
+
+		i = res2 + 1;
+
+		if (i < end - 1)
+		{
+			if (predView[i] != ' ')
+				throw "Incorrect predicate!";
+		}	
+	}
+	else
+	{
+		throw "Incorrect predicate!";
+	}
+
+	return retStr;
+}
+
+size_t InputHandler::SkipUntilPredicate(const std::string_view& argsView)
+{
+	size_t i = SkipUntilWhere(argsView, 0);
+	size_t strEnd = argsView.size();
+
+	while (i <= strEnd - 1)
+	{
+		if (argsView[i] == ' ')
+		{
+			i++;
+		}
+		else
+			break;
+	}
+
+	return i;
+}
+
+size_t InputHandler::SkipUntilStar(const std::string_view& argsView, const size_t& startPos)
+{
+	size_t i = startPos;
+	size_t strEnd = argsView.size();
+
+	while (i <= strEnd - 1)
+	{
+		if (argsView[i] == ' ')
+		{
+			i++;
+		}
+		else if (argsView[i] == '*' && i < strEnd - 1)
+		{
+			if (argsView[i + 1] != ' ')
+			{
+				throw "Incorrect command arguments!";
+			}
+
+			i++;
+
+			break;
+		}
+		else
+		{
+			throw "Incorrect command arguments!";
+		}
+	}
+
+	return i;
+}
+
+size_t InputHandler::SkipUntilWhere(const std::string_view& argsView, const size_t& startPos)
+{
+	size_t i = SkipUntilStar(argsView, startPos);
+	size_t strEnd = argsView.size();
+	size_t sizeOfWhere = std::string("where").size();
+
+	while (i <= strEnd - 1)
+	{
+		if (argsView[i] == ' ')
+		{
+			i++;
+		}
+		else if (argsView[i] == 'w' && i <= strEnd - sizeOfWhere)
+		{
+			if (argsView.substr(i, sizeOfWhere) != "where")
+			{
+				throw "Incorrect command arguments!";
+			}
+			else
+			{
+				i += sizeOfWhere;
+				break;
+			}
+		}
+		else
+		{
+			throw "Incorrect command arguments!";
+		}
+	}
+
+	if (i < strEnd - 1)
+	{
+		if (argsView[i] != ' ')
+			throw "Incorrect command arguments!";
+	}
+
+	return i;
 }
