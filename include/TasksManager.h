@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include <map>
 #include <string>
@@ -8,8 +8,8 @@
 #include "Task.h"
 
 /*
-  Класс, который содержит контейнер с объектами Task
-  и который ими управляет.
+  РљР»Р°СЃСЃ, РєРѕС‚РѕСЂС‹Р№ СЃРѕРґРµСЂР¶РёС‚ РєРѕРЅС‚РµР№РЅРµСЂ СЃ РѕР±СЉРµРєС‚Р°РјРё Task
+  Рё РєРѕС‚РѕСЂС‹Р№ РёРјРё СѓРїСЂР°РІР»СЏРµС‚.
 */
 class TasksManager
 {
@@ -19,52 +19,58 @@ public:
 	~TasksManager();
 
 	/*
-	Добавляет новую задачу в m_tasks.
-	Ничего не делает, если задача с таким именем уже находится в этом контейнере.
+	Р”РѕР±Р°РІР»СЏРµС‚ РЅРѕРІСѓСЋ Р·Р°РґР°С‡Сѓ РІ m_tasks.
+	РќРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµС‚, РµСЃР»Рё Р·Р°РґР°С‡Р° СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ РЅР°С…РѕРґРёС‚СЃСЏ РІ СЌС‚РѕРј РєРѕРЅС‚РµР№РЅРµСЂРµ.
 	*/
-	void AddTask(const std::string_view& name, const std::string_view& descr,
-		         const std::string_view& date, const std::string_view& categ);
+	void AddTask(const std::string_view name, const std::string_view descr,
+		         const std::string_view date, const std::string_view categ);
 	/*
-	Меняет значения полей задачи с именем name, если она есть в контейнере m_tasks.
-	Если такой задачи нет, то метод ничего не делает.
+	РњРµРЅСЏРµС‚ Р·РЅР°С‡РµРЅРёСЏ РїРѕР»РµР№ Р·Р°РґР°С‡Рё СЃ РёРјРµРЅРµРј name, РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ РІ РєРѕРЅС‚РµР№РЅРµСЂРµ m_tasks.
+	Р•СЃР»Рё С‚Р°РєРѕР№ Р·Р°РґР°С‡Рё РЅРµС‚, С‚Рѕ РјРµС‚РѕРґ РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµС‚.
 	*/
-	void UpdateTask(const std::string_view& name, const std::string_view& descr,
-		            const std::string_view& date, const std::string_view& categ);
+	void UpdateTask(const std::string_view name, const std::string_view descr,
+		            const std::string_view date, const std::string_view categ);
 
 	/* 
-	Заменяет задачу с именем oldName на задачу с именем newName с новыми полями
-	если в m_tasks есть задача с именем oldName и нет задачи с именем newName,
-	иначе ничего не делает.
+	Р—Р°РјРµРЅСЏРµС‚ Р·Р°РґР°С‡Сѓ СЃ РёРјРµРЅРµРј oldName РЅР° Р·Р°РґР°С‡Сѓ СЃ РёРјРµРЅРµРј newName СЃ РЅРѕРІС‹РјРё РїРѕР»СЏРјРё
+	РµСЃР»Рё РІ m_tasks РµСЃС‚СЊ Р·Р°РґР°С‡Р° СЃ РёРјРµРЅРµРј oldName Рё РЅРµС‚ Р·Р°РґР°С‡Рё СЃ РёРјРµРЅРµРј newName,
+	РёРЅР°С‡Рµ РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµС‚.
 	*/
-	void ReplaceTask(const std::string_view& oldName, const std::string_view& newName,
-		             const std::string_view& descr,   const std::string_view& date,
-		             const std::string_view& categ);
+	void ReplaceTask(const std::string_view oldName, const std::string_view newName,
+		             const std::string_view descr,   const std::string_view date,
+		             const std::string_view categ);
 
 	/*
-	  Удаляет задачу с именем name если m_tasks ее содержит,
-	  иначе ничего не делает.
+	  РЈРґР°Р»СЏРµС‚ Р·Р°РґР°С‡Сѓ СЃ РёРјРµРЅРµРј name РµСЃР»Рё m_tasks РµРµ СЃРѕРґРµСЂР¶РёС‚,
+	  РёРЅР°С‡Рµ РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµС‚.
 	*/
-	void DeleteTask(const std::string_view& name);
+	void DeleteTask(const std::string_view name);
 
 	/*
-	  Проверяет, содержит ли m_tasks задачу с именем name.
-	  Возвращает true если содержит, false если не содержит.
+	  РџСЂРѕРІРµСЂСЏРµС‚, СЃРѕРґРµСЂР¶РёС‚ Р»Рё m_tasks Р·Р°РґР°С‡Сѓ СЃ РёРјРµРЅРµРј name.
+	  Р’РѕР·РІСЂР°С‰Р°РµС‚ true РµСЃР»Рё СЃРѕРґРµСЂР¶РёС‚, false РµСЃР»Рё РЅРµ СЃРѕРґРµСЂР¶РёС‚.
 	*/
-	bool ContainsTask(const std::string_view& name) const;
+	bool ContainsTask(const std::string_view name) const;
 
 	/*
-	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной. 
+	  РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Р·Р°РґР°С‡Сѓ СЃ РёРјРµРЅРµРј name РёР· РєРѕРЅС‚РµР№РЅРµСЂР° m_tasks РІ СЃС‚Р°С‚СѓСЃ РІС‹РїРѕР»РЅРµРЅРЅРѕР№. 
 	*/
-	void SetTaskDone(const std::string_view& name);
+	void SetTaskDone(const std::string_view name);
+	/*
+	  Р’С‹РІРѕРґРёС‚ РІСЃРµ Р·Р°РґР°С‡Рё РІ РєРѕРЅСЃРѕР»СЊ.
+	*/
+	void DisplayAllTasks();
 
 	/*
-	  Производит отбор задач по требованиям, указанным в searchMap.
-	  Возвращает пару из имени подходящей задачи и самой задачи.
+	  РџСЂРѕРёР·РІРѕРґРёС‚ РѕС‚Р±РѕСЂ Р·Р°РґР°С‡ РїРѕ С‚СЂРµР±РѕРІР°РЅРёСЏРј, СѓРєР°Р·Р°РЅРЅС‹Рј РІ searchMap.
+	  Р’РѕР·РІСЂР°С‰Р°РµС‚ РІРµРєС‚РѕСЂ РєРѕРЅСЃС‚Р°РЅС‚РЅС‹С… СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° РїРѕРґС…РѕРґСЏС‰РёРµ РїРѕРґ С‚СЂРµР±РѕРІР°РЅРёСЏ Р·Р°РґР°С‡Рё.
 	*/
-	std::vector<std::pair<std::string, Task>>
-		SearchTasks(std::map<std::string, std::pair<std::string, std::string>>& searchMap);
+	std::vector<const Task*>
+		TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap);
 
 private:
-	// Контейнер с задачами
+	/*
+	  РљРѕРЅС‚РµР№РЅРµСЂ СЃ Р·Р°РґР°С‡Р°РјРё
+	*/
 	std::map<std::string, Task> m_tasks;
 };

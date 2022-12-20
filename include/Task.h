@@ -1,9 +1,11 @@
-#pragma once
+п»ї#pragma once
 
 #include <string>
 #include <string_view>
-#include <ostream>
 
+/*
+  РЎС‚Р°С‚СѓСЃ РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РґР°С‡Рё.
+*/
 enum TaskStatus
 {
 	on,
@@ -11,41 +13,43 @@ enum TaskStatus
 };
 
 /*
-  Класс, представляющий собой задачу.
+  РљР»Р°СЃСЃ, РєРѕС‚РѕСЂС‹Р№ РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ Р·Р°РґР°С‡Сѓ.
 */
 class Task
 {
 public:
-	// Логика класса не подразумевает наличие конструктора по-умолчанию.
+	/* 
+	  Р›РѕРіРёРєР° РєР»Р°СЃСЃР° РЅРµ РїРѕРґСЂР°Р·СѓРјРµРІР°РµС‚ РЅР°Р»РёС‡РёРµ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° РїРѕ - СѓРјРѕР»С‡Р°РЅРёСЋ.
+	*/
 
-	Task(const std::string_view& name, const std::string_view& descr,
-		const std::string_view& date, const std::string_view& categ);
+	Task(const std::string_view name, const std::string_view descr,
+		const std::string_view date, const std::string_view categ);
 	~Task();
 
 	/*
-	  Возвращает значение TaskStatus, которое отображает
-	  статус выполнения этой задачи.
+	  Р’РѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ TaskStatus, РєРѕС‚РѕСЂРѕРµ РѕС‚РѕР±СЂР°Р¶Р°РµС‚
+	  СЃС‚Р°С‚СѓСЃ РІС‹РїРѕР»РЅРµРЅРёСЏ СЌС‚РѕР№ Р·Р°РґР°С‡Рё.
 	*/
 	TaskStatus GetCompletionStatus() const;
 
 	/*
-	  Устанавливает эту задачу в статус выполненной. 
+	  РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ СЌС‚Сѓ Р·Р°РґР°С‡Сѓ РІ СЃС‚Р°С‚СѓСЃ РІС‹РїРѕР»РЅРµРЅРЅРѕР№. 
 	*/
 	void SetDone();
 
 	/*
-	  Присваивает полям этой задачи значения из аргументов.
+	  РџСЂРёСЃРІР°РёРІР°РµС‚ РїРѕР»СЏРј СЌС‚РѕР№ Р·Р°РґР°С‡Рё Р·РЅР°С‡РµРЅРёСЏ РёР· Р°СЂРіСѓРјРµРЅС‚РѕРІ.
 	*/
-	void Update(const std::string_view& descr, const std::string_view& date,
-		const std::string_view& categ);
+	void Update(const std::string_view descr, const std::string_view date,
+		const std::string_view categ);
 
-	void Display(std::ostream& out) const;
+	void Display() const;
 
-	bool NameIs(const std::string& op, const std::string& value);
-	bool DescriptionIs(const std::string& op, const std::string& value);
-	bool DateIs(const std::string& op, const std::string& value);
-	bool CategoryIs(const std::string& op, const std::string& value);
-	bool StatusIs(const std::string& op, const std::string& value);
+	bool NameIs(const std::string_view op, const std::string_view value) const;
+	bool DescriptionIs(const std::string_view op, const std::string_view value) const;
+	bool DateIs(const std::string_view op, const std::string_view value) const;
+	bool CategoryIs(const std::string_view op, const std::string_view value) const;
+	bool StatusIs(const std::string_view op, const std::string_view value) const;
 
 private:	
 	std::string m_name;

@@ -1,7 +1,6 @@
-#include "TasksManager.h"
+﻿#include "TasksManager.h"
 
 #include <string_view>
-#include <array>
 
 TasksManager::TasksManager()
 {
@@ -13,14 +12,14 @@ TasksManager::~TasksManager()
 
 }
 
-void TasksManager::AddTask(const std::string_view& name, const std::string_view& descr,
-	const std::string_view& date, const std::string_view& categ)
+void TasksManager::AddTask(const std::string_view name, const std::string_view descr,
+	const std::string_view date, const std::string_view categ)
 {
 	m_tasks.emplace(name, Task(name, descr, date, categ));
 }
 
-void TasksManager::UpdateTask(const std::string_view& name, const std::string_view& descr,
-	const std::string_view& date, const std::string_view& categ)
+void TasksManager::UpdateTask(const std::string_view name, const std::string_view descr,
+	const std::string_view date, const std::string_view categ)
 {
 	const std::string strName(name);
 
@@ -30,8 +29,8 @@ void TasksManager::UpdateTask(const std::string_view& name, const std::string_vi
 		it->second.Update(descr, date, categ);
 }
 
-void TasksManager::ReplaceTask(const std::string_view& oldName, const std::string_view& newName,
-	const std::string_view& descr, const std::string_view& date, const std::string_view& categ)
+void TasksManager::ReplaceTask(const std::string_view oldName, const std::string_view newName,
+	const std::string_view descr, const std::string_view date, const std::string_view categ)
 {	
 	const std::string strNewName(newName);
 	const std::string strOldName(oldName);
@@ -44,7 +43,7 @@ void TasksManager::ReplaceTask(const std::string_view& oldName, const std::strin
     }
 }
 
-void TasksManager::DeleteTask(const std::string_view& name)
+void TasksManager::DeleteTask(const std::string_view name)
 {
 	std::string strName(name);
 
@@ -54,12 +53,12 @@ void TasksManager::DeleteTask(const std::string_view& name)
 	}
 }
 
-bool TasksManager::ContainsTask(const std::string_view& name) const
+bool TasksManager::ContainsTask(const std::string_view name) const
 {
 	return m_tasks.find( std::string(name) ) == m_tasks.end() ? false : true;
 }
 
-void TasksManager::SetTaskDone(const std::string_view& name)
+void TasksManager::SetTaskDone(const std::string_view name)
 {
 	const std::string strName(name);
 	
@@ -69,47 +68,62 @@ void TasksManager::SetTaskDone(const std::string_view& name)
 		it->second.SetDone();
 }
 
-std::vector<std::pair<std::string, Task>>
-TasksManager::SearchTasks(std::map<std::string, std::pair<std::string, std::string>>& searchMap)
+void TasksManager::DisplayAllTasks()
 {
-	std::vector<std::pair<std::string, Task>> retVec;
+	for (std::pair<const std::string, Task>& ref : m_tasks)
+	{
+		ref.second.Display();
+	}
+}
+
+std::vector<const Task*>
+TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap)
+{
+	std::vector<const Task*> retVec;
 
 	for (std::pair<const std::string, Task>& taskPair : m_tasks)
 	{
-		for (const std::pair<std::string, std::pair<std::string, std::string>>& searchPair : searchMap)
+		for (const std::pair<std::string_view, std::pair<std::string_view, std::string_view>>& searchPair : searchMap)
 		{
-			const std::string& field = searchPair.first;
-			const std::string& op = searchPair.second.first;
-			const std::string& value = searchPair.second.second;
+			const auto field = searchPair.first;
+			const auto operatr = searchPair.second.first;
+			const auto value = searchPair.second.second;
 
 			if (field == "name")
 			{
-				if (!taskPair.second.NameIs(op, value))
+				if (!taskPair.second.NameIs(operatr, value))
 					break;
 			}
 			else if (field == "description")
 			{
-				if (!taskPair.second.DescriptionIs(op, value))
+				if (!taskPair.second.DescriptionIs(operatr, value))
 					break;
 			}
 			else if (field == "date")
 			{
-				if (!taskPair.second.DateIs(op, value))
+				if (!taskPair.second.DateIs(operatr, value))
 					break;
 			}
 			else if (field == "category")
 			{
-				if (!taskPair.second.CategoryIs(op, value))
+				if (!taskPair.second.CategoryIs(operatr, value))
 					break;
 			}
 			else if (field == "status")
 			{
-				if (!taskPair.second.StatusIs(op, value))
+				if (!taskPair.second.StatusIs(operatr, value))
 					break;
 			}
+			else
+			{
+				throw "Unknown field name!";
+			}
 
-			if(searchMap.find(searchPair.first) == std::prev(searchMap.end()))
-				retVec.push_back(taskPair);
+			/* 
+			  Если больше нет полей, по которым нужно производить поиск.
+			*/
+			if (searchMap.find(searchPair.first) == std::prev(searchMap.end()))
+				retVec.push_back(&taskPair.second);
 		}
 	}
 
