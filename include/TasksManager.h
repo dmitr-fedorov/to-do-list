@@ -32,17 +32,16 @@ public:
 		            const std::string_view date, const std::string_view categ);
 
 	/* 
-	Заменяет задачу с именем oldName на задачу с именем newName с новыми полями
-	если в m_tasks есть задача с именем oldName и нет задачи с именем newName,
-	иначе ничего не делает.
+	Заменяет задачу с именем oldName на задачу с именем newName с новыми полями.
+	Если нет задачи с именем oldName, то добавляет задачу с именем newName.
 	*/
 	void ReplaceTask(const std::string_view oldName, const std::string_view newName,
 		             const std::string_view descr,   const std::string_view date,
 		             const std::string_view categ);
 
 	/*
-	  Удаляет задачу с именем name если m_tasks ее содержит,
-	  иначе ничего не делает.
+	  Удаляет задачу с именем name в m_tasks.
+	  Если такой задачи нет, то метод ничего не делает.
 	*/
 	void DeleteTask(const std::string_view name);
 
@@ -54,19 +53,21 @@ public:
 
 	/*
 	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной. 
+	  Если такой задачи нет, то метод ничего не делает.
 	*/
 	void SetTaskDone(const std::string_view name);
 	/*
 	  Выводит все задачи в консоль.
 	*/
-	void DisplayAllTasks();
+	void DisplayAllTasks() const;
 
 	/*
 	  Производит отбор задач по требованиям, указанным в searchMap.
 	  Возвращает вектор константных указателей на подходящие под требования задачи.
+	  Возвращает пустой вектор если нет подходящих под требования задач.
 	*/
 	std::vector<const Task*>
-		TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap);
+		TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap) const;
 
 private:
 	/*

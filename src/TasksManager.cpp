@@ -21,9 +21,7 @@ void TasksManager::AddTask(const std::string_view name, const std::string_view d
 void TasksManager::UpdateTask(const std::string_view name, const std::string_view descr,
 	const std::string_view date, const std::string_view categ)
 {
-	const std::string strName(name);
-
-	auto it = m_tasks.find(strName);
+	auto it = m_tasks.find(std::string(name));
 
 	if (it != m_tasks.end())
 		it->second.Update(descr, date, categ);
@@ -31,57 +29,44 @@ void TasksManager::UpdateTask(const std::string_view name, const std::string_vie
 
 void TasksManager::ReplaceTask(const std::string_view oldName, const std::string_view newName,
 	const std::string_view descr, const std::string_view date, const std::string_view categ)
-{	
-	const std::string strNewName(newName);
-	const std::string strOldName(oldName);
+{
+	m_tasks.erase(std::string(oldName));
 	
-	if (m_tasks.count(strOldName) && !m_tasks.count(strNewName))
-	{
-		m_tasks.erase(strOldName);
-	
-	    m_tasks.emplace(newName, Task(newName, descr, date, categ));
-    }
+	m_tasks.emplace(newName, Task(newName, descr, date, categ));
 }
 
 void TasksManager::DeleteTask(const std::string_view name)
 {
-	std::string strName(name);
-
-	if (m_tasks.count(strName))
-	{
-		m_tasks.erase(strName);
-	}
+	m_tasks.erase(std::string(name));
 }
 
 bool TasksManager::ContainsTask(const std::string_view name) const
 {
-	return m_tasks.find( std::string(name) ) == m_tasks.end() ? false : true;
+	return m_tasks.find(std::string(name)) == m_tasks.end() ? false : true;
 }
 
 void TasksManager::SetTaskDone(const std::string_view name)
-{
-	const std::string strName(name);
-	
-	auto it = m_tasks.find(strName);
+{	
+	auto it = m_tasks.find(std::string(name));
 
 	if (it != m_tasks.end())
 		it->second.SetDone();
 }
 
-void TasksManager::DisplayAllTasks()
+void TasksManager::DisplayAllTasks() const
 {
-	for (std::pair<const std::string, Task>& ref : m_tasks)
+	for (const std::pair<const std::string, Task>& ref : m_tasks)
 	{
 		ref.second.Display();
 	}
 }
 
 std::vector<const Task*>
-TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap)
+TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap) const
 {
 	std::vector<const Task*> retVec;
 
-	for (std::pair<const std::string, Task>& taskPair : m_tasks)
+	for (const std::pair<const std::string, Task>& taskPair : m_tasks)
 	{
 		for (const std::pair<std::string_view, std::pair<std::string_view, std::string_view>>& searchPair : searchMap)
 		{

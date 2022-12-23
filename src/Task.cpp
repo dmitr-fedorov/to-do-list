@@ -26,9 +26,9 @@ void Task::SetDone()
 
 void Task::Update(const std::string_view descr, const std::string_view date, const std::string_view categ)
 {
-	m_description = std::string(descr);
-	m_date = std::string(date);
-	m_category = std::string(categ);
+	m_description = descr;
+	m_date = date;
+	m_category = categ;
 }
 
 void Task::Display() const
