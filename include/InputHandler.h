@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <regex>
 #include <string_view>
 #include <string>
 #include <vector>
@@ -9,7 +8,7 @@
 #include "TasksManager.h"
 
 /*
-  Структура для ханения команды и ее аргументов.
+  Структура для хранения команды и ее аргументов.
 */
 struct DividedInput
 {
@@ -18,7 +17,7 @@ struct DividedInput
 };
 
 /*
-  Структура, которую возвращает фукнция InputHander::ReadSelectValue().
+  Структура, которую возвращает функция InputHander::ReadSelectValue().
   value - значение, по которому будет производится поиск.
   Считанное значение заключено в кавычки.
   indexAfterValue - индекс следующего после значения символа в предикате.
@@ -30,7 +29,7 @@ struct RetSelectValue
 };
 
 /*
-  Структура, которую возвращает фукнция InputHander::ReadSelectOperator().
+  Структура, которую возвращает функция InputHander::ReadSelectOperator().
   operatr - оператор, с помощью которого будет производиться поиск.
   indexAfterOperator - индекс следующего после оператора символа в предикате.
 */
@@ -57,11 +56,6 @@ public:
 	int StartReading();
 
 private:
-	/*
-	Регулярное выражение, необходимое для проверки
-	корректности формата введенной пользователем даты.
-	*/
-	static const std::regex M_CONST_DATE_REGEX;
 	/*
 	  Строка, при вводе которой в консоль приложение завершает работу.
 	*/
@@ -122,12 +116,6 @@ private:
 	const std::vector<std::string_view> SplitIntoWords(const std::string_view inpView);
 
 	/*
-	  Возвращает true, если дата в строке inpView соответствует регулярному выражению M_CONST_DATE_REGEX.
-	  В противном случае возвращает false.
-	*/
-	bool IsDateFormatCorrect(const std::string_view inpView);
-
-	/*
 	  Если строка inpView заключена в кавычки, то метод возвращает эту строку без кавычек.
 	  В противном случает возвращает эту строку без изменений.
 	*/
@@ -143,9 +131,9 @@ private:
 	/*
 	  Выводит в консоль приглашение на ввод даты создания задачи, считывает и анализирует ввод.
 	  Выводит в консоль сообщения о некорректном вводе даты, если она была введена неправильно.
-	  Возвращает введенную строку, если она соответствует требованиям.
+	  Возвращает объект DateTime, сформированный из введенной строки.
 	*/
-	std::string ReadDate();
+	DateTime ReadDateTime();
 
 	/*
 	  Анализирует предикат predView.

@@ -13,26 +13,28 @@ TasksManager::~TasksManager()
 }
 
 void TasksManager::AddTask(const std::string_view name, const std::string_view descr,
-	const std::string_view date, const std::string_view categ)
+	const DateTime& dateTime, const std::string_view categ)
 {
-	m_tasks.emplace(name, Task(name, descr, date, categ));
+	m_tasks.emplace(name, Task(name, descr, dateTime, categ));
 }
 
 void TasksManager::UpdateTask(const std::string_view name, const std::string_view descr,
-	const std::string_view date, const std::string_view categ)
+	const DateTime& dateTime, const std::string_view categ)
 {
-	auto it = m_tasks.find(std::string(name));
+	const std::string strName(name);
+
+	auto it = m_tasks.find(strName);
 
 	if (it != m_tasks.end())
-		it->second.Update(descr, date, categ);
+		it->second.Update(descr, dateTime, categ);
 }
 
 void TasksManager::ReplaceTask(const std::string_view oldName, const std::string_view newName,
-	const std::string_view descr, const std::string_view date, const std::string_view categ)
-{
+	const std::string_view descr, const DateTime& dateTime, const std::string_view categ)
+{	
 	m_tasks.erase(std::string(oldName));
 	
-	m_tasks.emplace(newName, Task(newName, descr, date, categ));
+	m_tasks.emplace(newName, Task(newName, descr, dateTime, categ));
 }
 
 void TasksManager::DeleteTask(const std::string_view name)
@@ -42,12 +44,14 @@ void TasksManager::DeleteTask(const std::string_view name)
 
 bool TasksManager::ContainsTask(const std::string_view name) const
 {
-	return m_tasks.find(std::string(name)) == m_tasks.end() ? false : true;
+	return m_tasks.find( std::string(name) ) == m_tasks.end() ? false : true;
 }
 
 void TasksManager::SetTaskDone(const std::string_view name)
-{	
-	auto it = m_tasks.find(std::string(name));
+{
+	const std::string strName(name);
+	
+	auto it = m_tasks.find(strName);
 
 	if (it != m_tasks.end())
 		it->second.SetDone();
@@ -86,7 +90,9 @@ TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string
 			}
 			else if (field == "date")
 			{
-				if (!taskPair.second.DateIs(operatr, value))
+				const auto dateTime(DateTimeUtility::ConstructDateTime(value));
+
+				if (!taskPair.second.DateTimeIs(operatr, dateTime))
 					break;
 			}
 			else if (field == "category")

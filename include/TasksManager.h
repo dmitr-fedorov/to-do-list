@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "Task.h"
+#include "DateTimeUtility.h";
 
 /*
   Класс, который содержит контейнер с объектами Task
@@ -19,25 +20,24 @@ public:
 	~TasksManager();
 
 	/*
-	Добавляет новую задачу в m_tasks.
-	Ничего не делает, если задача с таким именем уже находится в этом контейнере.
+	  Добавляет новую задачу в m_tasks.
+	  Ничего не делает, если задача с таким именем уже находится в этом контейнере.
 	*/
 	void AddTask(const std::string_view name, const std::string_view descr,
-		         const std::string_view date, const std::string_view categ);
+		         const DateTime& dateTime, const std::string_view categ);
 	/*
-	Меняет значения полей задачи с именем name, если она есть в контейнере m_tasks.
-	Если такой задачи нет, то метод ничего не делает.
+	  Меняет значения полей задачи с именем name, если она есть в контейнере m_tasks.
+	  Если такой задачи нет, то метод ничего не делает.
 	*/
 	void UpdateTask(const std::string_view name, const std::string_view descr,
-		            const std::string_view date, const std::string_view categ);
+		            const DateTime& dateTime, const std::string_view categ);
 
-	/* 
-	Заменяет задачу с именем oldName на задачу с именем newName с новыми полями.
-	Если нет задачи с именем oldName, то добавляет задачу с именем newName.
+	/*
+	  Заменяет задачу с именем oldName на задачу с именем newName с новыми полями.
+	  Если нет задачи с именем oldName, то добавляет задачу с именем newName.
 	*/
 	void ReplaceTask(const std::string_view oldName, const std::string_view newName,
-		             const std::string_view descr,   const std::string_view date,
-		             const std::string_view categ);
+		             const std::string_view descr, const DateTime& dateTime, const std::string_view categ);
 
 	/*
 	  Удаляет задачу с именем name в m_tasks.
@@ -52,10 +52,11 @@ public:
 	bool ContainsTask(const std::string_view name) const;
 
 	/*
-	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной. 
+	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной.
 	  Если такой задачи нет, то метод ничего не делает.
 	*/
 	void SetTaskDone(const std::string_view name);
+
 	/*
 	  Выводит все задачи в консоль.
 	*/

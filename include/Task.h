@@ -3,14 +3,7 @@
 #include <string>
 #include <string_view>
 
-/*
-  Статус выполнения задачи.
-*/
-enum TaskStatus
-{
-	on,
-	done,  	
-};
+#include "DateTime.h"
 
 /*
   Класс, который представляет собой задачу.
@@ -23,14 +16,8 @@ public:
 	*/
 
 	Task(const std::string_view name, const std::string_view descr,
-		const std::string_view date, const std::string_view categ);
+		const DateTime& dateTime, const std::string_view categ);
 	~Task();
-
-	/*
-	  Возвращает значение TaskStatus, которое отображает
-	  статус выполнения этой задачи.
-	*/
-	TaskStatus GetCompletionStatus() const;
 
 	/*
 	  Устанавливает эту задачу в статус выполненной. 
@@ -40,21 +27,23 @@ public:
 	/*
 	  Присваивает полям этой задачи значения из аргументов.
 	*/
-	void Update(const std::string_view descr, const std::string_view date,
-		const std::string_view categ);
+	void Update(const std::string_view descr, const DateTime& dateTime, const std::string_view categ);
 
+	/*
+	  Выводит эту задачу в консоль.
+	*/
 	void Display() const;
 
 	bool NameIs(const std::string_view op, const std::string_view value) const;
 	bool DescriptionIs(const std::string_view op, const std::string_view value) const;
-	bool DateIs(const std::string_view op, const std::string_view value) const;
+	bool DateTimeIs(const std::string_view op, const DateTime& other) const;
 	bool CategoryIs(const std::string_view op, const std::string_view value) const;
 	bool StatusIs(const std::string_view op, const std::string_view value) const;
 
 private:	
 	std::string m_name;
 	std::string m_description;
-	std::string m_date;
 	std::string m_category;
-	TaskStatus m_status;
+	std::string m_status;
+	DateTime m_dateTime;	
 };

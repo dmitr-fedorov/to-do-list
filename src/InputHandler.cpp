@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 
-const std::regex InputHandler::M_CONST_DATE_REGEX("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}");
 const std::string InputHandler::M_CONST_STRING_EXIT = "q";
 const std::string InputHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(") + M_CONST_STRING_EXIT + " to exit): ";
 
@@ -88,17 +87,16 @@ void InputHandler::HandleAdd(const std::string_view argsView)
 		{
 			throw "Incorrect number of arguments!";
 		}
-		else if (!IsDateFormatCorrect(Unquoted(argWords[INDX_DATE])))
-		{
-			throw "Date format is incorrect! Suitable date format: \"yyyy-mm-dd hh:mm\".";
-		}
-		else if (m_tasksManager.ContainsTask(Unquoted(argWords[INDX_NAME])))
+		
+		if (m_tasksManager.ContainsTask(Unquoted(argWords[INDX_NAME])))
 		{
 			throw "This task already exists!";
 		}
 
+		const auto dateTime( DateTimeUtility::ConstructDateTime(Unquoted(argWords[INDX_DATE])) );
+
 		m_tasksManager.AddTask( Unquoted(argWords[INDX_NAME]), Unquoted(argWords[INDX_DESCRIPTION]),
-			                    Unquoted(argWords[INDX_DATE]), Unquoted(argWords[INDX_CATEGORY]) );
+			                    dateTime, Unquoted(argWords[INDX_CATEGORY]) );
 	}
 	catch (const char* msg)
 	{
@@ -131,12 +129,6 @@ void InputHandler::HandleDone(const std::string_view argsView)
 
 void InputHandler::HandleUpdate(const std::string_view argsView)
 {
-	// Индексы аргументов
-	static const int INDX_NAME        = 0;
-	static const int INDX_DESCRIPTION = 1;
-	static const int INDX_DATE        = 2;
-	static const int INDX_CATEGORY    = 3;
-
 	try
 	{
 		const auto unquotedArgs = Unquoted(argsView);
@@ -148,33 +140,28 @@ void InputHandler::HandleUpdate(const std::string_view argsView)
 
 		std::cout << "Please, enter new fields." << std::endl;
 
-		std::vector<std::string> newFields;
-
 		std::string inputLine;
 
-		newFields.push_back(ReadName(unquotedArgs));
+		const auto newName(ReadName(unquotedArgs));
 
 		std::cout << "description: ";
 		std::getline(std::cin, inputLine, '\n');
-		newFields.push_back(inputLine);
+		const auto newDescription(inputLine);
 
-		newFields.push_back(ReadDate());
+		const auto newDateTime(ReadDateTime());
 
 		std::cout << "category: ";
 		std::getline(std::cin, inputLine, '\n');
-		newFields.push_back(inputLine);
-
-		if (unquotedArgs != Unquoted(newFields[INDX_NAME]))
+		const auto newCategory(inputLine);
+		
+		if (unquotedArgs != Unquoted(newName))
 		{
-			m_tasksManager.ReplaceTask( unquotedArgs, Unquoted(newFields[INDX_NAME]),
-				                        Unquoted(newFields[INDX_DESCRIPTION]), Unquoted(newFields[INDX_DATE]),
-				                        Unquoted(newFields[INDX_CATEGORY]) );
+			m_tasksManager.ReplaceTask(unquotedArgs, Unquoted(newName), Unquoted(newDescription), newDateTime, Unquoted(newCategory));
 		}
 		else
 		{
-			m_tasksManager.UpdateTask( Unquoted(newFields[INDX_NAME]), Unquoted(newFields[INDX_DESCRIPTION]),
-				                       Unquoted(newFields[INDX_DATE]), Unquoted(newFields[INDX_CATEGORY]) );
-		}
+			m_tasksManager.UpdateTask(Unquoted(newName), Unquoted(newDescription), newDateTime, Unquoted(newCategory));
+		}		
 	}
 	catch (const char* msg)
 	{
@@ -186,6 +173,7 @@ void InputHandler::HandleUpdate(const std::string_view argsView)
 void InputHandler::HandleDelete(const std::string_view argsView)
 {
 	const auto unquotedArgs = Unquoted(argsView);
+
 	try
 	{
 		if (!m_tasksManager.ContainsTask(unquotedArgs))
@@ -318,13 +306,6 @@ InputHandler::SplitIntoWords(const std::string_view inpView)
 	return wordViews;
 }
 
-bool InputHandler::IsDateFormatCorrect(const std::string_view inpView)
-{
-	const std::string_view unquotedDateView(Unquoted(inpView));
-
-	return regex_match(unquotedDateView.begin(), unquotedDateView.end(), M_CONST_DATE_REGEX);
-}
-
 std::string_view InputHandler::Unquoted(const std::string_view inpView)
 {	
 	const size_t inpLength = inpView.length();
@@ -358,19 +339,20 @@ std::string_view InputHandler::Unquoted(const std::string_view inpView)
 std::string InputHandler::ReadName(const std::string_view argNameView)
 {
 	std::string inputLine;
+	std::string_view unqInpLineView;
 
 	std::cout << "name: ";
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
-		const auto unqInpLineView = Unquoted(inputLine);
+		unqInpLineView = Unquoted(inputLine);
 
 		if (SplitIntoWords(inputLine).size() < 1)
 		{
 			std::cout << "Try again: ";
 			continue;
 		}
-		else if (unqInpLineView == argNameView)
+		else if (unqInpLineView == Unquoted(argNameView))
 		{
 			break;
 		}
@@ -380,9 +362,8 @@ std::string InputHandler::ReadName(const std::string_view argNameView)
 			std::cout << "Try again: ";
 			continue;
 		}
-		else if (Unquoted(inputLine).find('\"') != Unquoted(inputLine).npos)
+		else if (unqInpLineView.find('\"') != unqInpLineView.npos)
 		{
-			std::cout << Unquoted(inputLine) << std::endl;
 			std::cout << "Redundant quotes are not allowed in name!" << std::endl;
 			std::cout << "Try again: ";
 			continue;
@@ -396,7 +377,7 @@ std::string InputHandler::ReadName(const std::string_view argNameView)
 	return inputLine;
 }
 
-std::string InputHandler::ReadDate()
+DateTime InputHandler::ReadDateTime()  
 {
 	std::string inputLine;
 
@@ -404,18 +385,19 @@ std::string InputHandler::ReadDate()
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
-		if (!IsDateFormatCorrect(inputLine))
+		try
 		{
-			std::cout << "Date format is incorrect! Suitable date format: \"yyyy-mm-dd hh:mm\"." << std::endl;
-			std::cout << "Try again: ";
+			const auto retDateTime( DateTimeUtility::ConstructDateTime(Unquoted(inputLine)) );
 
+			return retDateTime;
+		}
+		catch (const char* msg)
+		{
+			std::cout << msg << std::endl;
+			std::cout << "Try again: ";
 			continue;
 		}
-		else
-			break;
 	}
-
-	return inputLine;
 }
 
 const std::map<std::string_view, std::pair<std::string_view, std::string_view>>
