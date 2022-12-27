@@ -1,5 +1,8 @@
 ﻿#include "DateTimeUtility.h"
 
+#include <string>
+#include <cctype>
+
 DateTime DateTimeUtility::ConstructDateTime(const std::string_view dateTimeView)
 {
 	static const int YEAR_INDEX = 0;
@@ -26,11 +29,11 @@ DateTime DateTimeUtility::ConstructDateTime(const std::string_view dateTimeView)
 	std::string str_hours(dateTimeView.substr(HOURS_INDEX, HOURS_LENGTH));
 	std::string str_minutes(dateTimeView.substr(MINUTES_INDEX, MINUTES_LENGTH));
 
-	int year = stoi(str_year);
-	int month = stoi(str_month);
-	int day = stoi(str_day);
-	int hours = stoi(str_hours);
-	int minutes = stoi(str_minutes);
+	int year = std::stoi(str_year);
+	int month = std::stoi(str_month);
+	int day = std::stoi(str_day);
+	int hours = std::stoi(str_hours);
+	int minutes = std::stoi(str_minutes);
 
 	if (!IsDateValid(year, month, day))
 		throw "Date is invalid!";
@@ -43,7 +46,40 @@ DateTime DateTimeUtility::ConstructDateTime(const std::string_view dateTimeView)
 
 bool DateTimeUtility::IsDateTimeFormatCorrect(const std::string_view dateTimeView)
 {
-	return regex_match(dateTimeView.begin(), dateTimeView.end(), CONST_DATE_TIME_REGEX);
+	static const int NUM_REQUIRED_SYMBOLS = 16;
+
+	static const int INDX_FIRST_DASH = 4;
+	static const int INDX_SECOND_DASH = 7;
+	static const int INDX_WHITESPACE = 10;
+	static const int INDX_COLON = 13;
+
+	const int end = dateTimeView.size();
+
+	if (end != NUM_REQUIRED_SYMBOLS)
+		return false;
+
+	for (int i = 0; i < end; i++)
+	{
+		if (i == INDX_FIRST_DASH || i == INDX_SECOND_DASH)
+		{
+			if (dateTimeView[i] != '-')
+				return false;
+		}
+		else if (i == INDX_WHITESPACE)
+		{
+			if (dateTimeView[i] != ' ')
+				return false;
+		}
+		else if (i == INDX_COLON)
+		{
+			if (dateTimeView[i] != ':')
+				return false;
+		}
+		else if (!std::isdigit(dateTimeView[i]))
+			return false;
+	}
+
+	return true;
 }
 
 bool DateTimeUtility::IsDateValid(const int year, const int month, const int day)

@@ -1,16 +1,11 @@
 ﻿#pragma once
 
-#include <regex>
+#include <string_view>
 
 #include "DateTime.h"
 
 namespace DateTimeUtility
 {
-	/*
-	  Регулярное выражение, необходимое для проверки
-	  корректности формата даты.
-	*/
-	const std::regex CONST_DATE_TIME_REGEX("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}");
 	/*
 	  Создает объект DateTime из переданной строки dateTimeView и возвращает его.
 	  Выбрасывает исключения с сообщением в следующих случаях:
@@ -21,9 +16,8 @@ namespace DateTimeUtility
 	DateTime ConstructDateTime(const std::string_view dateTimeView);
 
 	/*
-	  Возвращает true, если формат даты и времени в строке inpView соответствует
-	  регулярному выражению CONST_DATE_TIME_REGEX.
-	  В противном случае возвращает false.
+	  Проверяет, соответствует ли строка dateTimeView формату "yyyy-mm-dd hh:mm"
+	  Возвращает true, если строка соответствует, false, если не соответствует.
 	*/
 	bool IsDateTimeFormatCorrect(const std::string_view dateTimeView);
 	/*
