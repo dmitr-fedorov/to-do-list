@@ -70,7 +70,7 @@ int InputHandler::StartReading()
 
 void InputHandler::HandleAdd(const std::string_view argsView)
 {	
-	// Колличество необходимых аргументов
+	// Количество необходимых аргументов
 	static const int NUM_REQUIRED_ARGS = 4;
 
 	// Индексы аргументов
