@@ -1,48 +1,6 @@
 ﻿#include "DateTimeUtility.h"
 
-#include <string>
 #include <cctype>
-
-DateTime DateTimeUtility::ConstructDateTime(const std::string_view dateTimeView)
-{
-	static const int YEAR_INDEX = 0;
-	static const int YEAR_LENGTH = 4;
-
-	static const int MONTH_INDEX = 5;
-	static const int MONTH_LENGTH = 2;
-
-	static const int DAY_INDEX = 8;
-	static const int DAY_LENGTH = 2;
-
-	static const int HOURS_INDEX = 11;
-	static const int HOURS_LENGTH = 2;
-
-	static const int MINUTES_INDEX = 14;
-	static const int MINUTES_LENGTH = 2;
-
-	if (!IsDateTimeFormatCorrect(dateTimeView))
-		throw "Date and time format is incorrect! Suitable format: \"yyyy-mm-dd hh:mm\".";
-
-	std::string str_year(dateTimeView.substr(YEAR_INDEX, YEAR_LENGTH));
-	std::string str_month(dateTimeView.substr(MONTH_INDEX, MONTH_LENGTH));
-	std::string str_day(dateTimeView.substr(DAY_INDEX, DAY_LENGTH));
-	std::string str_hours(dateTimeView.substr(HOURS_INDEX, HOURS_LENGTH));
-	std::string str_minutes(dateTimeView.substr(MINUTES_INDEX, MINUTES_LENGTH));
-
-	int year = std::stoi(str_year);
-	int month = std::stoi(str_month);
-	int day = std::stoi(str_day);
-	int hours = std::stoi(str_hours);
-	int minutes = std::stoi(str_minutes);
-
-	if (!IsDateValid(year, month, day))
-		throw "Date is invalid!";
-
-	if (!IsTimeValid(hours, minutes))
-		throw "Time is invalid!";
-
-	return DateTime(year, month, day, hours, minutes);
-}
 
 bool DateTimeUtility::IsDateTimeFormatCorrect(const std::string_view dateTimeView)
 {

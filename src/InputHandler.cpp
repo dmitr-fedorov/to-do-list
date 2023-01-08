@@ -93,7 +93,7 @@ void InputHandler::HandleAdd(const std::string_view argsView)
 			throw "This task already exists!";
 		}
 
-		const auto dateTime( DateTimeUtility::ConstructDateTime(Unquoted(argWords[INDX_DATE])) );
+		const DateTime dateTime((Unquoted(argWords[INDX_DATE])));
 
 		m_tasksManager.AddTask( Unquoted(argWords[INDX_NAME]), Unquoted(argWords[INDX_DESCRIPTION]),
 			                    dateTime, Unquoted(argWords[INDX_CATEGORY]) );
@@ -387,7 +387,7 @@ DateTime InputHandler::ReadDateTime()
 	{
 		try
 		{
-			const auto retDateTime( DateTimeUtility::ConstructDateTime(Unquoted(inputLine)) );
+			const DateTime retDateTime((Unquoted(inputLine)));
 
 			return retDateTime;
 		}

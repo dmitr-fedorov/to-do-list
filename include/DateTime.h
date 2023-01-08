@@ -4,11 +4,21 @@
 
 /*
    Класс, который представляет собой дату (год, месяц, день) и время (часы и минуты).
-   Класс не проводит проверку на валидность значений, передаваемых в его методы и конструктор.
 */
 class DateTime
 {
 public:
+	/*
+	  dateTimeView - строка с датой в формате "yyyy-mm-dd hh:mm".
+	  Констркутор выбрасывает исключение const char* с сообщением в следующих случаях:
+	  - Формат строки не соответствует формату "yyyy-mm-dd hh:mm";
+	  - Дата не валидна;
+	  - Время не валидно;
+	*/
+	DateTime(const std::string_view dateTimeView);
+	/*
+	  Констркутор выбрасывает исключение const char* с сообщением, если время или дата не валидны.
+	*/
 	DateTime(const int year, const int month, const int day, const int hours, const int minutes);
 	~DateTime();
 

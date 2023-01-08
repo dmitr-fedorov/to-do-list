@@ -90,7 +90,7 @@ TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string
 			}
 			else if (field == "date")
 			{
-				const auto dateTime(DateTimeUtility::ConstructDateTime(value));
+				const DateTime dateTime(value);
 
 				if (!taskPair.second.DateTimeIs(operatr, dateTime))
 					break;

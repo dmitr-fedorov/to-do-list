@@ -7,15 +7,6 @@
 namespace DateTimeUtility
 {
 	/*
-	  Создает объект DateTime из переданной строки dateTimeView и возвращает его.
-	  Выбрасывает исключения cosnt char* с сообщением в следующих случаях:
-	  - Формат даты некорректен;
-	  - Дата не валидна;
-	  - Время не валидно.
-	*/
-	DateTime ConstructDateTime(const std::string_view dateTimeView);
-
-	/*
 	  Проверяет, соответствует ли строка dateTimeView формату "yyyy-mm-dd hh:mm"
 	  Возвращает true, если строка соответствует, в противном случае возвращает false.
 	*/
