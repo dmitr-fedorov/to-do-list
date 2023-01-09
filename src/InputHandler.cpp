@@ -93,6 +93,14 @@ void InputHandler::HandleAdd(const std::string_view argsView)
 			throw "This task already exists!";
 		}
 
+		for (int i = 0; i <= INDX_CATEGORY; i++)
+		{
+			if (Unquoted(argWords[i]).find('\"') != std::string_view::npos)
+			{
+				throw "Incorrect usage of quotes!";
+			}
+		}
+
 		const DateTime dateTime((Unquoted(argWords[INDX_DATE])));
 
 		m_tasksManager.AddTask( Unquoted(argWords[INDX_NAME]), Unquoted(argWords[INDX_DESCRIPTION]),
@@ -140,19 +148,13 @@ void InputHandler::HandleUpdate(const std::string_view argsView)
 
 		std::cout << "Please, enter new fields." << std::endl;
 
-		std::string inputLine;
-
 		const auto newName(ReadName(unquotedArgs));
 
-		std::cout << "description: ";
-		std::getline(std::cin, inputLine, '\n');
-		const auto newDescription(inputLine);
+		const auto newDescription(ReadField("description"));
 
 		const auto newDateTime(ReadDateTime());
 
-		std::cout << "category: ";
-		std::getline(std::cin, inputLine, '\n');
-		const auto newCategory(inputLine);
+		const auto newCategory(ReadField("category"));
 		
 		if (unquotedArgs != Unquoted(newName))
 		{
@@ -336,45 +338,66 @@ std::string_view InputHandler::Unquoted(const std::string_view inpView)
 	return retView;
 }
 
-std::string InputHandler::ReadName(const std::string_view argNameView)
+std::string InputHandler::ReadField(const std::string_view fieldNameView)
 {
 	std::string inputLine;
 	std::string_view unqInpLineView;
 
-	std::cout << "name: ";
+	if (!fieldNameView.empty())
+		std::cout << fieldNameView << ": ";
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
 		unqInpLineView = Unquoted(inputLine);
 
-		if (SplitIntoWords(inputLine).size() < 1)
+		if (unqInpLineView.empty())
 		{
 			std::cout << "Try again: ";
 			continue;
 		}
-		else if (unqInpLineView == Unquoted(argNameView))
+
+		if (unqInpLineView.find('\"') != std::string_view::npos)
+		{
+			std::cout << "Incorrect usage of quotes!" << '\n';
+			std::cout << "Try again: ";
+			continue;
+		}
+
+		break;
+	}
+
+	return inputLine;
+}
+
+std::string InputHandler::ReadName(const std::string_view argNameView)
+{
+	std::string retName;
+
+	std::cout << "name: ";
+
+	while (true)
+	{
+		retName = ReadField();
+
+		const auto unqName(Unquoted(retName));
+
+		if (unqName == Unquoted(argNameView))
 		{
 			break;
 		}
-		else if (m_tasksManager.ContainsTask(unqInpLineView))
+		else if (m_tasksManager.ContainsTask(unqName))
 		{
 			std::cout << "This task already exists!" << std::endl;
 			std::cout << "Try again: ";
 			continue;
-		}
-		else if (unqInpLineView.find('\"') != unqInpLineView.npos)
-		{
-			std::cout << "Redundant quotes are not allowed in name!" << std::endl;
-			std::cout << "Try again: ";
-			continue;
-		}
+		}		
 		else
 		{
 			break;
 		}
 	}
 
-	return inputLine;
+	return retName;
 }
 
 DateTime InputHandler::ReadDateTime()  
