@@ -123,13 +123,19 @@ bool DateTime::operator >=(const DateTime& other) const
 
 std::ostream& operator<<(std::ostream& os, const DateTime& dt)
 {
-    os << dt.m_year << "-" << dt.m_month << "-" << dt.m_day << " ";
+    os << dt.m_year << "-";
+
+    if (dt.m_month < 10)
+        os << "0";
+    os << dt.m_month << "-";
+
+    if (dt.m_day < 10)
+        os << "0";
+    os << dt.m_day << " ";
 
     if (dt.m_hours < 10)
         os << "0";
-    os << dt.m_hours;
-
-    os << ":";
+    os << dt.m_hours << ":";
 
     if (dt.m_minutes < 10)
         os << "0";
