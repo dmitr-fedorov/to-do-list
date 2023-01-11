@@ -62,6 +62,8 @@ void TasksManager::DisplayAllTasks() const
 	for (const std::pair<const std::string, Task>& ref : m_tasks)
 	{
 		ref.second.Display();
+
+		std::cout << std::endl;
 	}
 }
 

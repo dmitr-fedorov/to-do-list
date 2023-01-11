@@ -28,13 +28,11 @@ void Task::Update(const std::string_view descr, const DateTime& dateTime, const 
 
 void Task::Display() const
 {
-	std::cout << "name: " << m_name << std::endl;
-	std::cout << "description: " << m_description << std::endl;
-	std::cout << "date: " << m_dateTime << std::endl;
-	std::cout << "category: " << m_category << std::endl;
-	std::cout << "status: " << m_status << std::endl;
-
-	std::cout << std::endl;
+	std::cout << "name       : " << m_name        << '\n';
+	std::cout << "description: " << m_description << '\n';
+	std::cout << "date       : " << m_dateTime    << '\n';
+	std::cout << "category   : " << m_category    << '\n';
+	std::cout << "status     : " << m_status      << '\n';
 }
 
 bool Task::NameIs(const std::string_view op, const std::string_view value) const

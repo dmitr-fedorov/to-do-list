@@ -56,6 +56,7 @@ int InputHandler::StartReading()
 				std::cout << "Incorrect command or number of arguments!" << std::endl;
 			}
 
+			std::cout << '\n';
 			std::cout << M_CONST_STRING_ENTER_COMMAND;
 		}
 		catch (...)
@@ -222,7 +223,7 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 			throw "Symbols right after \'*\' are not allowed!";
 		}
 
-		const auto indx3 = argsView.find_first_of(" ", indx2);  //
+		const auto indx3 = argsView.find_first_of(" ", indx2);
 
 		if (argsView.substr(indx2, indx3 - indx2) != "where")
 		{
@@ -244,6 +245,8 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 		for (auto taskRef : vec)
 		{
 			taskRef->Display();
+
+			std::cout << '\n';
 		}
 	}
 	catch (const char* msg)
