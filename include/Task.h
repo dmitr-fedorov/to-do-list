@@ -11,10 +11,6 @@
 class Task
 {
 public:
-	/* 
-	  Логика класса не подразумевает наличие конструктора по - умолчанию.
-	*/
-
 	Task(const std::string_view name, const std::string_view descr,
 		const DateTime& dateTime, const std::string_view categ);
 	~Task();

@@ -4,7 +4,8 @@
 #include <sstream>
 
 const std::string InputHandler::M_CONST_STRING_EXIT = "q";
-const std::string InputHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(") + M_CONST_STRING_EXIT + " to exit): ";
+const std::string InputHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(")
+                                                                 + M_CONST_STRING_EXIT + " to exit): ";
 
 InputHandler::InputHandler()
 {
@@ -159,11 +160,13 @@ void InputHandler::HandleUpdate(const std::string_view argsView)
 		
 		if (unquotedArgs != Unquoted(newName))
 		{
-			m_tasksManager.ReplaceTask(unquotedArgs, Unquoted(newName), Unquoted(newDescription), newDateTime, Unquoted(newCategory));
+			m_tasksManager.ReplaceTask(unquotedArgs, Unquoted(newName),
+				Unquoted(newDescription), newDateTime, Unquoted(newCategory));
 		}
 		else
 		{
-			m_tasksManager.UpdateTask(Unquoted(newName), Unquoted(newDescription), newDateTime, Unquoted(newCategory));
+			m_tasksManager.UpdateTask(Unquoted(newName), Unquoted(newDescription),
+				newDateTime, Unquoted(newCategory));
 		}		
 	}
 	catch (const char* msg)
@@ -240,7 +243,9 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 		auto vec(m_tasksManager.SearchTasks(searchMap));
 
 		if (vec.empty())
+		{
 			throw "No suitable tasks found.";
+		}
 
 		for (auto taskRef : vec)
 		{
@@ -256,7 +261,8 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 	}
 }
 
-DividedInput InputHandler::GetCommandAndArguments(const std::string_view inpView)
+InputHandler::DividedInput
+InputHandler::GetCommandAndArguments(const std::string_view inpView)
 {
 	DividedInput retVal;
 
@@ -413,9 +419,7 @@ DateTime InputHandler::ReadDateTime()
 	{
 		try
 		{
-			const DateTime retDateTime((Unquoted(inputLine)));
-
-			return retDateTime;
+			return DateTime( Unquoted(inputLine) );
 		}
 		catch (const char* msg)
 		{
@@ -426,11 +430,11 @@ DateTime InputHandler::ReadDateTime()
 	}
 }
 
-const std::map<std::string_view, std::pair<std::string_view, std::string_view>>
+const TasksManager::SearchMap
 InputHandler::AnalyzePredicate(const std::string_view predView)
 {
-	std::map<std::string_view, std::pair<std::string_view, std::string_view>> retMap;
-	std::pair <std::string_view, std::pair<std::string_view, std::string_view>> tmpPair;
+	TasksManager::SearchMap retMap;
+	TasksManager::SearchPair tmpPair;
 
 	size_t end = predView.length();
 	size_t i = 0;
@@ -441,7 +445,8 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 		{
 			i++;
 		}
-		else if (predView[i] == '<' || predView[i] == '=' || predView[i] == '>' || predView[i] == '"')
+		else if (predView[i] == '<' || predView[i] == '=' ||
+			     predView[i] == '>' || predView[i] == '"')
 		{
 			throw "Incorrect predicate!";
 		}
@@ -456,7 +461,9 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 					if (word == "and")
 					{
 						if (retMap.empty())
+						{
 							throw "The word \'and\' should not be the first word in predicate!";
+						}
 						
 						i = j + 1;
 
@@ -482,7 +489,9 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 					}
 
 					if (!retMap.emplace(tmpPair).second)
+					{
 						throw "You cannot enter one field several times in predicate!";
+					}
 
 					tmpPair = {};
 
@@ -515,7 +524,9 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 					i = result.indexAfterValue;
 
 					if (!retMap.emplace(tmpPair).second)
+					{
 						throw "You cannot enter one field several times in predicate!";
+					}
 
 					tmpPair = {};
 
@@ -531,17 +542,20 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 	}
 
 	if (retMap.empty())
+	{
 		throw "Predicate is empty!";
+	}
 
 	return retMap;
 }
 
-RetSelectOperator InputHandler::ReadSelectOperator(const std::string_view predView, const size_t startPos)
+InputHandler::RetSelOperator
+InputHandler::ReadSelectOperator(const std::string_view predView, const size_t startPos)
 {
 	auto indx = predView.find_first_not_of(' ', startPos);
 	auto end = predView.size();
 
-	RetSelectOperator retStruct;
+	RetSelOperator retStruct;
 
 	if (indx == std::string_view::npos)
 	{
@@ -562,12 +576,13 @@ RetSelectOperator InputHandler::ReadSelectOperator(const std::string_view predVi
 	return retStruct;
 }
 
-RetSelectValue InputHandler::ReadSelectValue(const std::string_view predView, const size_t startPos)
+InputHandler::RetSelValue
+InputHandler::ReadSelectValue(const std::string_view predView, const size_t startPos)
 {
 	const auto indx = predView.find_first_not_of(' ', startPos);
 	auto end = predView.size();
 
-	RetSelectValue retStruct;
+	RetSelValue retStruct;
 
 	if (indx == std::string_view::npos)
 	{

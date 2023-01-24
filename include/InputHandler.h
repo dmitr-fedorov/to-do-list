@@ -8,38 +8,6 @@
 #include "TasksManager.h"
 
 /*
-  Структура для хранения команды и ее аргументов.
-*/
-struct DividedInput
-{
-	std::string_view command;
-	std::string_view arguments;
-};
-
-/*
-  Структура, которую возвращает функция InputHander::ReadSelectValue().
-  value - значение, по которому будет производится поиск.
-  Считанное значение заключено в кавычки.
-  indexAfterValue - индекс следующего после значения символа в предикате.
-*/
-struct RetSelectValue
-{
-	std::string_view value;
-	size_t indexAfterValue;
-};
-
-/*
-  Структура, которую возвращает функция InputHander::ReadSelectOperator().
-  operatr - оператор, с помощью которого будет производиться поиск.
-  indexAfterOperator - индекс следующего после оператора символа в предикате.
-*/
-struct RetSelectOperator
-{
-	std::string_view operatr;
-	size_t indexAfterOperator;
-};
-
-/*
   Класс, который обрабатывает ввод пользователя, выводит в консоль приглашения на ввод, сообщения
   о неправильном вводе и результаты запросов пользователя.
 */
@@ -56,6 +24,34 @@ public:
 	int StartReading();
 
 private:
+    /*
+      Структура для хранения команды и ее аргументов.
+    */
+    struct DividedInput
+    {
+    	std::string_view command;
+    	std::string_view arguments;
+    };
+    
+    struct RetSelValue
+    {
+    	// Значение, по которому будет производится поиск.
+    	// Оно заключено в кавычки.
+    	std::string_view value;
+    
+        // индекс следующего после значения символа в предикате.
+    	size_t indexAfterValue{ std::string_view::npos };
+    };
+    
+    struct RetSelOperator
+    {
+    	// Оператор, с помощью которого будет производиться поиск.
+    	std::string_view operatr;
+    
+        // Индекс следующего после оператора символа в предикате.
+    	size_t indexAfterOperator{ std::string_view::npos };
+    };
+
 	/*
 	  Строка, при вводе которой в консоль приложение завершает работу.
 	*/
@@ -146,18 +142,14 @@ private:
 	  Анализирует предикат predView.
 	  Если пользователь ввел некорректный предикат, то выбрасывает исключение const char*
 	  с описанием того, какая часть ввода была некорректной.
-	  second.first - оператор, относящийся к полю,
-	  second.second - значение, по которому производится проверка поля
-	  Возвращает std::map, где first - имя поля, по которому нужно проводить поиск,  
 	*/
-	const std::map<std::string_view, std::pair<std::string_view, std::string_view>>
-		AnalyzePredicate(const std::string_view predView);
+	const TasksManager::SearchMap AnalyzePredicate(const std::string_view predView);
 	/*
 	  Считывает оператор из predView начиная с startPos.
 	  Выбрасывает исключение const char* с сообщением, если оператор отсутствует, или если после оператора нет значения.
 	  Возвращает структуру, со считанным оператором и индексом места в predView, где заканчивается этот оператор.
 	*/
-	RetSelectOperator ReadSelectOperator(const std::string_view predView, const size_t startPos);
+	RetSelOperator ReadSelectOperator(const std::string_view predView, const size_t startPos);
 	/*
 	  Считывает значение поиска из predView начиная с startPos.
 	  Выбрасывает исключение const char* с сообщением в следующих случаях:
@@ -168,5 +160,5 @@ private:
 	  Возвращает структуру, со считанным значением и индексом места в predView,
 	  где заканчивается это значение.
 	*/
-	RetSelectValue ReadSelectValue(const std::string_view predView, const size_t startPos);
+	RetSelValue ReadSelectValue(const std::string_view predView, const size_t startPos);
 };

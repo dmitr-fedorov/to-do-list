@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "Task.h"
-#include "DateTimeUtility.h";
+#include "DateTimeUtility.h"
 
 /*
   Класс, который содержит контейнер с объектами Task
@@ -15,6 +15,15 @@
 class TasksManager
 {
 public:
+	/*
+	  Контейнер, который содержит критерии для отбора задач.
+	  first - имя поля, по которому нужно проводить поиск,
+      second.first - оператор, относящийся к полю,
+      second.second - значение, по которому производится проверка поля.
+	*/
+	typedef std::map<std::string_view, std::pair<std::string_view, std::string_view>> SearchMap;
+	typedef std::pair<std::string_view, std::pair<std::string_view, std::string_view>> SearchPair;
+
 	TasksManager();
 
 	~TasksManager();
@@ -68,8 +77,7 @@ public:
 	  Возвращает вектор константных указателей на подходящие под требования задачи.
 	  Возвращает пустой вектор, если нет подходящих под требования задач.
 	*/
-	std::vector<const Task*>
-		TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap) const;
+	std::vector<const Task*> TasksManager::SearchTasks(const SearchMap& searchMap) const;
 
 private:
 	/*

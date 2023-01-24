@@ -21,9 +21,7 @@ void TasksManager::AddTask(const std::string_view name, const std::string_view d
 void TasksManager::UpdateTask(const std::string_view name, const std::string_view descr,
 	const DateTime& dateTime, const std::string_view categ)
 {
-	const std::string strName(name);
-
-	auto it = m_tasks.find(strName);
+	auto it = m_tasks.find(std::string(name));
 
 	if (it != m_tasks.end())
 		it->second.Update(descr, dateTime, categ);
@@ -44,14 +42,12 @@ void TasksManager::DeleteTask(const std::string_view name)
 
 bool TasksManager::ContainsTask(const std::string_view name) const
 {
-	return m_tasks.find( std::string(name) ) == m_tasks.end() ? false : true;
+	return m_tasks.find(std::string(name)) == m_tasks.end() ? false : true;
 }
 
 void TasksManager::SetTaskDone(const std::string_view name)
-{
-	const std::string strName(name);
-	
-	auto it = m_tasks.find(strName);
+{	
+	auto it = m_tasks.find(std::string(name));
 
 	if (it != m_tasks.end())
 		it->second.SetDone();
@@ -68,13 +64,13 @@ void TasksManager::DisplayAllTasks() const
 }
 
 std::vector<const Task*>
-TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string_view, std::string_view>> searchMap) const
+TasksManager::SearchTasks(const SearchMap& searchMap) const
 {
 	std::vector<const Task*> retVec;
 
 	for (const std::pair<const std::string, Task>& taskPair : m_tasks)
 	{
-		for (const std::pair<std::string_view, std::pair<std::string_view, std::string_view>>& searchPair : searchMap)
+		for (const SearchPair& searchPair : searchMap)
 		{
 			const auto field = searchPair.first;
 			const auto operatr = searchPair.second.first;
@@ -92,9 +88,7 @@ TasksManager::SearchTasks(const std::map<std::string_view, std::pair<std::string
 			}
 			else if (field == "date")
 			{
-				const DateTime dateTime(value);
-
-				if (!taskPair.second.DateTimeIs(operatr, dateTime))
+				if (!taskPair.second.DateTimeIs(operatr, DateTime(value)))
 					break;
 			}
 			else if (field == "category")

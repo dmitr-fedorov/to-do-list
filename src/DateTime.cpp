@@ -21,7 +21,9 @@ DateTime::DateTime(const std::string_view dateTimeView)
     static const int MINUTES_LENGTH = 2;
 
     if (!DateTimeUtility::IsDateTimeFormatCorrect(dateTimeView))
+    {
         throw "Date and time format is incorrect! Suitable format: \"yyyy-mm-dd hh:mm\".";
+    }
 
     std::string str_year(dateTimeView.substr(YEAR_INDEX, YEAR_LENGTH));
     std::string str_month(dateTimeView.substr(MONTH_INDEX, MONTH_LENGTH));
@@ -36,20 +38,28 @@ DateTime::DateTime(const std::string_view dateTimeView)
     m_minutes = std::stoi(str_minutes);
 
     if (!DateTimeUtility::IsDateValid(m_year, m_month, m_day))
+    {
         throw "Date is invalid!";
+    }
 
     if (!DateTimeUtility::IsTimeValid(m_hours, m_minutes))
+    {
         throw "Time is invalid!";
+    }
 }
 
 DateTime::DateTime(const int year, const int month, const int day, const int hours, const int minutes)
 	: m_year(year), m_month(month), m_day(day), m_hours(hours), m_minutes(minutes)
 {
     if (!DateTimeUtility::IsDateValid(m_year, m_month, m_day))
+    {
         throw "Date is invalid!";
+    }
 
     if (!DateTimeUtility::IsTimeValid(m_hours, m_minutes))
+    {
         throw "Time is invalid!";
+    }
 }
 
 DateTime::~DateTime()
