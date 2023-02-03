@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <utility>
 
 #include "Task.h"
-#include "DateTimeUtility.h"
 
 /*
   Класс, который содержит контейнер с объектами Task
@@ -16,52 +16,60 @@ class TasksManager
 {
 public:
 	/*
-	  Контейнер, который содержит критерии для отбора задач.
-	  first - имя поля, по которому нужно проводить поиск,
-      second.first - оператор, относящийся к полю,
-      second.second - значение, по которому производится проверка поля.
+	  Выражение, по которому проводится отбор задач.
 	*/
-	typedef std::map<std::string_view, std::pair<std::string_view, std::string_view>> SearchMap;
-	typedef std::pair<std::string_view, std::pair<std::string_view, std::string_view>> SearchPair;
+	struct Expression
+	{
+		std::string_view field;
+		std::string_view operatr;
+		std::string_view value;
+
+		bool operator< (const Expression& other) const
+		{
+			return field < other.field;
+		}
+	};
 
 	TasksManager();
 
 	~TasksManager();
 
 	/*
-	  Добавляет новую задачу в m_tasks.
-	  Ничего не делает, если задача с таким именем уже находится в этом контейнере.
+	  Добавляет новую задачу с переданными в качестве аргументов полями.
+	  Ничего не делает, если задача с таким именем уже существует.
 	*/
-	void AddTask(const std::string_view name, const std::string_view descr,
-		         const DateTime& dateTime, const std::string_view categ);
+	void AddTask(const std::string_view name, const std::string_view description,
+		const DateTime& dateTime, const std::string_view category);
 	/*
-	  Меняет значения полей задачи с именем name, если она есть в контейнере m_tasks.
-	  Если такой задачи нет, то метод ничего не делает.
+	  Меняет значения полей задачи с именем name на значения из аргументов.
+	  Ничего не делает, если задача с таким именем не существует.
 	*/
-	void UpdateTask(const std::string_view name, const std::string_view descr,
-		            const DateTime& dateTime, const std::string_view categ);
+	void UpdateTask(const std::string_view name, const std::string_view description,
+		const DateTime& dateTime, const std::string_view category);
 
 	/*
-	  Заменяет задачу с именем oldName на задачу с именем newName с новыми полями.
-	  Если нет задачи с именем oldName, то добавляет задачу с именем newName.
+	  Заменяет задачу с именем oldName на задачу с именем newName с новыми полями из аргументов.
+	  Ничего не делает, если задача с именем oldName не существует,
+	  или задача с именем newName уже существует.
 	*/
 	void ReplaceTask(const std::string_view oldName, const std::string_view newName,
-		             const std::string_view descr, const DateTime& dateTime, const std::string_view categ);
+		const std::string_view description, const DateTime& dateTime, const std::string_view category);
 
 	/*
-	  Удаляет задачу с именем name в m_tasks.
-	  Если такой задачи нет, то метод ничего не делает.
+	  Удаляет задачу с именем name.
+	  Ничего не делает, если задача с таким именем не существует.
 	*/
 	void DeleteTask(const std::string_view name);
 
 	/*
-	  Проверяет, содержит ли m_tasks задачу с именем name.
-	  Возвращает true если содержит, false если не содержит.
+	  Проверяет, существует ли задача с именем name.
+	  Возвращает true, если задача существует,
+	  в противном случае возвращает false.
 	*/
 	bool ContainsTask(const std::string_view name) const;
 
 	/*
-	  Устанавливает задачу с именем name из контейнера m_tasks в статус выполненной.
+	  Устанавливает задачу с именем name в статус выполненной.
 	  Если такой задачи нет, то метод ничего не делает.
 	*/
 	void SetTaskDone(const std::string_view name);
@@ -72,16 +80,19 @@ public:
 	void DisplayAllTasks() const;
 
 	/*
-	  Производит отбор задач по требованиям, указанным в searchMap.
-	  Выбрасывает исключение const char* с сообщением, если searchMap содержит поле с некорректным названием.
-	  Возвращает вектор константных указателей на подходящие под требования задачи.
-	  Возвращает пустой вектор, если нет подходящих под требования задач.
+	  Выполняет отбор задач, которые соответствуют выражениям из expressions.
+	  Выбрасывает исключение const char* с сообщением, если expressions содержит
+	  некорректные выражения.
+	  Возвращает вектор константных указателей на задачи, которые соответствуют выражениям.
+	  Если таких задач нет, то возвращает пустой вектор.
 	*/
-	std::vector<const Task*> TasksManager::SearchTasks(const SearchMap& searchMap) const;
+	std::vector<const Task*> TasksManager::SearchTasks(const std::set<Expression>& expressions) const;
 
 private:
 	/*
-	  Контейнер с задачами
+	  Контейнер с задачами.
+	  first - название задачи,
+	  second - объект, представляющий собой задачу.
 	*/
 	std::map<std::string, Task> m_tasks;
 };

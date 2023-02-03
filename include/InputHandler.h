@@ -3,6 +3,7 @@
 #include <string_view>
 #include <string>
 #include <vector>
+#include <set>
 #include <utility>
 
 #include "TasksManager.h"
@@ -24,16 +25,22 @@ public:
 	int StartReading();
 
 private:
-    /*
-      Структура для хранения команды и ее аргументов.
-    */
-    struct DividedInput
+    struct CommandAndArguments
     {
     	std::string_view command;
     	std::string_view arguments;
     };
+
+    struct OperatorAndIndex
+    {
+    	// Оператор, с помощью которого будет производиться поиск.
+    	std::string_view operatr;
     
-    struct RetSelValue
+        // Индекс следующего после оператора символа в предикате.
+    	size_t indexAfterOperator{ std::string_view::npos };
+    };
+
+    struct ValueAndIndex
     {
     	// Значение, по которому будет производится поиск.
     	// Оно заключено в кавычки.
@@ -43,21 +50,12 @@ private:
     	size_t indexAfterValue{ std::string_view::npos };
     };
     
-    struct RetSelOperator
-    {
-    	// Оператор, с помощью которого будет производиться поиск.
-    	std::string_view operatr;
-    
-        // Индекс следующего после оператора символа в предикате.
-    	size_t indexAfterOperator{ std::string_view::npos };
-    };
-
 	/*
 	  Строка, при вводе которой в консоль приложение завершает работу.
 	*/
 	static const std::string M_CONST_STRING_EXIT;
 	/*
-	  Приглашение на ввод пользователем команды.
+	  Приглашение на ввод команды.
 	*/
 	static const std::string M_CONST_STRING_ENTER_COMMAND;
 
@@ -70,67 +68,68 @@ private:
 	/*
 	  Обрабатывает команду добавления новой задачи в список и
 	  выводит в консоль сообщения о некорректном вводе.
-	  argsView - аргументы команды.
+	  arguments - аргументы команды.
 	*/
-	void HandleAdd(const std::string_view argsView);
+	void HandleAdd(const std::string_view arguments);
 	/*
-	  Обрабатывает команду установки находящейся в списке задачи в состояние выполненной и
-	  выводит в консоль сообщения о некорректном вводе.
-	  argsView - аргументы команды.
+	  Обрабатывает команду установки задачи с именем taskName в состояние выполненной
+	  и выводит в консоль сообщения о некорректном вводе.
 	*/
-	void HandleDone(const std::string_view argsView);
+	void HandleDone(const std::string_view taskName);
 	/*
-	  Обрабатывает команду установки новых значений в поля находящейся в списке задачи и
-	  выводит в консоль сообщения о некорректном вводе.
-	  argsView - аргументы команды.
+	  Обрабатывает команду установки новых значений в поля задачи с именем taskName
+	  и выводит в консоль сообщения о некорректном вводе.
 	*/
-	void HandleUpdate(const std::string_view argsView);
+	void HandleUpdate(const std::string_view taskName);
 	/*
-	  Обрабатывает команду удаления задачи из списка и
-	  выводит в консоль сообщения о некорректном вводе.
-	  argsView - аргументы команды.
+	  Обрабатывает команду удаления задачи с именем taskName
+	  и выводит в консоль сообщения о некорректном вводе.
 	*/
-	void HandleDelete(const std::string_view argsView);
+	void HandleDelete(const std::string_view taskName);
 	/*
-	  Обрабатывает команду поиска задач из списка по предикату из argsView.
+	  Обрабатывает команду поиска задач по предикату из arguments.
 	  Выводит в консоль сообщения о некорректном вводе команды или предиката.
-	  argsView - аргументы команды.
 	*/
-	void HandleSelect(const std::string_view argsView);
+	void HandleSelect(const std::string_view arguments);
 
 	/*
-	  Делит введенную пользователем строку inpView на две части: команду и аргументы.
+	  Делит строку line на две части: команду и аргументы.
 	  Возвращает структуру с разделенным вводом.
 	*/
-	DividedInput GetCommandAndArguments(const std::string_view inpView);
+	CommandAndArguments SplitCommandAndArguments(const std::string_view line);
 
 	/*
-	  Разделяет строку inpView на отдельные слова и возвращает вектор, где каждый элемент - отдельное слово в inpView.
-	  Каждая подстрока в кавычках, отделенная от других слов пробелами, считается одним словом.
-	  Слова заносятся в вектор вместе с кавычками.
+	  Разделяет строку line на отдельные слова и возвращает контейнер с этими словами.
+	  Каждая подстрока, заключенная в кавычки и отделенная от других слов пробелами с обеих сторон,
+	  считается одним словом. Такие слова заносятся в контейнер без кавычек в начале и конце.
 	*/
-	const std::vector<std::string_view> SplitIntoWords(const std::string_view inpView);
+	std::vector<std::string_view> SplitIntoWords(const std::string_view line);
 
 	/*
-	  Если строка inpView заключена в кавычки, то метод возвращает эту строку без кавычек.
+	  Если строка line заключена в кавычки, и между кавычек есть хотя бы один символ,
+	  то метод возвращает эту строку без кавычек.
 	  В противном случает возвращает эту строку без изменений.
 	*/
-	std::string_view Unquoted(const std::string_view inpView);
+	std::string_view Unquoted(const std::string_view line);
 
 	/*
-	  Выводит в консоль приглашение на ввод значения поля с именем fieldNameView, считывает и анализирует ввод.
-	  Если fieldNameView пуста, то метод просто ожидает ввод значения поля без предварительного вывода приглашения.
+	  Выводит в консоль приглашение на ввод значения для поля с названием fieldName,
+	  считывает и анализирует ввод.
+	  Если fieldName пуста, то метод просто ожидает ввод значения поля
+	  без предварительного вывода приглашения.
 	  В случае некорректного ввода метод выводит сообщение об этом и просит повторить попытку.
-	  Возвращает введенную строку, если она соответствует требованиям.
+	  Возвращает введенную строку.
+	  Если введенная строка заключена в кавычки, то возвращает ее без кавычек с обеих сторон.
 	*/
-	std::string ReadField(const std::string_view fieldNameView = "");
+	std::string ReadField(const std::string_view fieldName = "");
 	/*
-	  Выводит в консоль приглашение на ввод имени задачи, считывает и анализирует ввод.
+	  Выводит в консоль приглашение на ввод нового имени задачи с именем taskName,
+	  считывает и анализирует ввод.
 	  В случае некорректного ввода метод выводит сообщение об этом и просит повторить попытку.
-	  argNameView - вид на строку с именем задачи, для которой считывается новое имя.
-	  Возвращает введенную строку, если она соответствует требованиям. 
+	  Возвращает введенную строку.
+	  Если введенная строка заключена в кавычки, то возвращает ее без кавычек с обеих сторон.
 	*/
-	std::string ReadName(const std::string_view argNameView);
+	std::string ReadName(const std::string_view taskName);
 	/*
 	  Выводит в консоль приглашение на ввод даты, считывает и анализирует ввод.
 	  В случае некорректного ввода метод выводит сообщение об этом и просит повторить попытку.
@@ -139,26 +138,26 @@ private:
 	DateTime ReadDateTime();
 
 	/*
-	  Анализирует предикат predView.
+	  Анализирует предикат predicate и возвращает выражения из этого предиката.
 	  Если пользователь ввел некорректный предикат, то выбрасывает исключение const char*
 	  с описанием того, какая часть ввода была некорректной.
 	*/
-	const TasksManager::SearchMap AnalyzePredicate(const std::string_view predView);
+	const std::set<TasksManager::Expression> AnalyzePredicate(const std::string_view predicate);
 	/*
-	  Считывает оператор из predView начиная с startPos.
+	  Считывает оператор из predicate начиная с позиции startPos.
 	  Выбрасывает исключение const char* с сообщением, если оператор отсутствует, или если после оператора нет значения.
-	  Возвращает структуру, со считанным оператором и индексом места в predView, где заканчивается этот оператор.
+	  Возвращает структуру, со считанным оператором и индексом места в predicate, где заканчивается этот оператор.
 	*/
-	RetSelOperator ReadSelectOperator(const std::string_view predView, const size_t startPos);
+	OperatorAndIndex ReadOperatorFromPredicate(const std::string_view predicate, const size_t startPos);
 	/*
-	  Считывает значение поиска из predView начиная с startPos.
+	  Считывает значение поиска из predicate начиная с позиции startPos.
 	  Выбрасывает исключение const char* с сообщением в следующих случаях:
 	  - В строке нет значения;
 	  - Значение не заключено в кавычки;
 	  - В значении есть избыточные кавычки;
 	  - В кавычках нет значения.
-	  Возвращает структуру, со считанным значением и индексом места в predView,
-	  где заканчивается это значение.
+	  Возвращает структуру, со считанным значением без кавычек с обеих сторон,
+	  и c индексом места в predicate, где заканчивается это значение.
 	*/
-	RetSelValue ReadSelectValue(const std::string_view predView, const size_t startPos);
+	ValueAndIndex ReadValueFromPredicate(const std::string_view predicate, const size_t startPos);
 };

@@ -11,8 +11,8 @@
 class Task
 {
 public:
-	Task(const std::string_view name, const std::string_view descr,
-		const DateTime& dateTime, const std::string_view categ);
+	Task(const std::string_view name, const std::string_view description,
+		const DateTime& dateTime, const std::string_view category);
 	~Task();
 
 	/*
@@ -23,7 +23,8 @@ public:
 	/*
 	  Присваивает полям этой задачи значения из аргументов.
 	*/
-	void Update(const std::string_view descr, const DateTime& dateTime, const std::string_view categ);
+	void Update(const std::string_view description, const DateTime& dateTime,
+		const std::string_view category);
 
 	/*
 	  Выводит эту задачу в консоль.

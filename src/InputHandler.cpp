@@ -20,7 +20,9 @@ InputHandler::~InputHandler()
 int InputHandler::StartReading()
 {
 	std::cout << M_CONST_STRING_ENTER_COMMAND;
+
 	std::string inputLine;
+
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
 		if (inputLine == M_CONST_STRING_EXIT)
@@ -30,31 +32,34 @@ int InputHandler::StartReading()
 
 		try
 		{
-			const auto divLine = GetCommandAndArguments(inputLine);
+			const auto cmdAndArgs{ SplitCommandAndArguments(inputLine) };
 
-			if (divLine.command == "add")
+			const auto command  { cmdAndArgs.command };
+			const auto arguments{ cmdAndArgs.arguments };
+
+			if (command == "add")
 			{
-				HandleAdd(divLine.arguments);
+				HandleAdd(arguments);
 			}
-			else if (divLine.command == "done")
+			else if (command == "done")
 			{
-				HandleDone(divLine.arguments);
+				HandleDone(arguments);
 			}
-			else if (divLine.command == "update")
+			else if (command == "update")
 			{
-				HandleUpdate(divLine.arguments);
+				HandleUpdate(arguments);
 			}
-			else if (divLine.command == "delete")
+			else if (command == "delete")
 			{
-				HandleDelete(divLine.arguments);
+				HandleDelete(arguments);
 			}
-			else if (divLine.command == "select")
+			else if (command == "select")
 			{
-				HandleSelect(divLine.arguments);
+				HandleSelect(arguments);
 			}
 			else
 			{
-				std::cout << "Incorrect command or number of arguments!" << std::endl;
+				std::cout << "Incorrect command!" << std::endl;
 			}
 
 			std::cout << '\n';
@@ -70,12 +75,12 @@ int InputHandler::StartReading()
 	return 0;
 }
 
-void InputHandler::HandleAdd(const std::string_view argsView)
+void InputHandler::HandleAdd(const std::string_view arguments)
 {	
 	// Количество необходимых аргументов
 	static const int NUM_REQUIRED_ARGS = 4;
 
-	// Индексы аргументов
+	// Индексы полей в аргументах
 	static const int INDX_NAME        = 0;
 	static const int INDX_DESCRIPTION = 1;
 	static const int INDX_DATE        = 2;
@@ -83,30 +88,28 @@ void InputHandler::HandleAdd(const std::string_view argsView)
 	
 	try
 	{
-		const auto argWords(SplitIntoWords(argsView));
+		const auto fields{ SplitIntoWords(arguments) };
 
-		if (argWords.size() != NUM_REQUIRED_ARGS)
+		if (fields.size() != NUM_REQUIRED_ARGS)
 		{
 			throw "Incorrect number of arguments!";
 		}
 		
-		if (m_tasksManager.ContainsTask(Unquoted(argWords[INDX_NAME])))
+		if (m_tasksManager.ContainsTask(fields[INDX_NAME]))
 		{
 			throw "This task already exists!";
 		}
 
-		for (int i = 0; i <= INDX_CATEGORY; i++)
+		for (int i = 0; i < NUM_REQUIRED_ARGS; i++)
 		{
-			if (Unquoted(argWords[i]).find('\"') != std::string_view::npos)
+			if (fields[i].find('\"') != std::string_view::npos)
 			{
-				throw "Incorrect usage of quotes!";
+				throw "Incorrect usage of quotes in arguments!";
 			}
 		}
 
-		const DateTime dateTime((Unquoted(argWords[INDX_DATE])));
-
-		m_tasksManager.AddTask( Unquoted(argWords[INDX_NAME]), Unquoted(argWords[INDX_DESCRIPTION]),
-			                    dateTime, Unquoted(argWords[INDX_CATEGORY]) );
+		m_tasksManager.AddTask( fields[INDX_NAME], fields[INDX_DESCRIPTION],
+			DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY] );
 	}
 	catch (const char* msg)
 	{
@@ -115,20 +118,18 @@ void InputHandler::HandleAdd(const std::string_view argsView)
 	}
 }
 
-void InputHandler::HandleDone(const std::string_view argsView)
+void InputHandler::HandleDone(const std::string_view taskName)
 {
-	const auto unquotedArgs = Unquoted(argsView);
+	const auto unquotedName{ Unquoted(taskName) };
 
 	try
 	{
-		std::vector<std::string_view> argWords(SplitIntoWords(argsView));
-
-		if (!m_tasksManager.ContainsTask(unquotedArgs))
+		if (!m_tasksManager.ContainsTask(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
 
-		m_tasksManager.SetTaskDone(unquotedArgs);
+		m_tasksManager.SetTaskDone(unquotedName);
 	}
 	catch (const char* msg)
 	{
@@ -137,36 +138,35 @@ void InputHandler::HandleDone(const std::string_view argsView)
 	}
 }
 
-void InputHandler::HandleUpdate(const std::string_view argsView)
+void InputHandler::HandleUpdate(const std::string_view taskName)
 {
 	try
 	{
-		const auto unquotedArgs = Unquoted(argsView);
+		const auto unquotedName{ Unquoted(taskName) };
 
-		if ( !m_tasksManager.ContainsTask(unquotedArgs) )
+		if (!m_tasksManager.ContainsTask(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
 
-		std::cout << "Please, enter new fields." << std::endl;
+		std::cout << "Please, enter new fields." << '\n';
 
-		const auto newName(ReadName(unquotedArgs));
+		const auto newName{ ReadName(unquotedName) };
 
-		const auto newDescription(ReadField("description"));
+		const auto newDescription{ ReadField("description") };
 
-		const auto newDateTime(ReadDateTime());
+		const auto newDateTime{ ReadDateTime() };
 
-		const auto newCategory(ReadField("category"));
+		const auto newCategory{ ReadField("category") };
 		
-		if (unquotedArgs != Unquoted(newName))
+		if (unquotedName != newName)
 		{
-			m_tasksManager.ReplaceTask(unquotedArgs, Unquoted(newName),
-				Unquoted(newDescription), newDateTime, Unquoted(newCategory));
+			m_tasksManager.ReplaceTask(unquotedName, newName, newDescription,
+				newDateTime, newCategory);
 		}
 		else
 		{
-			m_tasksManager.UpdateTask(Unquoted(newName), Unquoted(newDescription),
-				newDateTime, Unquoted(newCategory));
+			m_tasksManager.UpdateTask(newName, newDescription, newDateTime, newCategory);
 		}		
 	}
 	catch (const char* msg)
@@ -176,18 +176,18 @@ void InputHandler::HandleUpdate(const std::string_view argsView)
 	}
 }
 
-void InputHandler::HandleDelete(const std::string_view argsView)
+void InputHandler::HandleDelete(const std::string_view taskName)
 {
-	const auto unquotedArgs = Unquoted(argsView);
+	const auto unquotedName = Unquoted(taskName);
 
 	try
 	{
-		if (!m_tasksManager.ContainsTask(unquotedArgs))
+		if (!m_tasksManager.ContainsTask(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
 
-		m_tasksManager.DeleteTask(unquotedArgs);
+		m_tasksManager.DeleteTask(unquotedName);
 	}
 	catch (const char* msg)
 	{
@@ -196,23 +196,23 @@ void InputHandler::HandleDelete(const std::string_view argsView)
 	}
 }
 
-void InputHandler::HandleSelect(const std::string_view argsView)
+void InputHandler::HandleSelect(const std::string_view arguments)
 {
 	try
 	{
-		const auto indx = argsView.find_first_not_of(" ", 0);
+		const auto indx = arguments.find_first_not_of(" ", 0);
 
 		if (indx == std::string_view::npos)
 		{
 			throw "You should provide arguments for the command!";
 		}
 
-		if (argsView[indx] != '*')
+		if (arguments[indx] != '*')
 		{
 			throw "After \'select\' must come the symbol \'*\'!";
 		}
 
-		const auto indx2 = argsView.find_first_not_of(" ", indx + 1);
+		const auto indx2 = arguments.find_first_not_of(" ", indx + 1);
 
 		if (indx2 == std::string_view::npos)
 		{
@@ -226,9 +226,9 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 			throw "Symbols right after \'*\' are not allowed!";
 		}
 
-		const auto indx3 = argsView.find_first_of(" ", indx2);
+		const auto indx3 = arguments.find_first_of(" ", indx2);
 
-		if (argsView.substr(indx2, indx3 - indx2) != "where")
+		if (arguments.substr(indx2, indx3 - indx2) != "where")
 		{
 			throw "After \'*\' must come the word \'where\'!";
 		}
@@ -238,18 +238,20 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 			throw "Predicate is empty!";
 		}
 
-		const auto searchMap = AnalyzePredicate(argsView.substr(indx3, argsView.size() - indx3));
+		const auto predicate{ arguments.substr(indx3, arguments.size() - indx3) };
 
-		auto vec(m_tasksManager.SearchTasks(searchMap));
+		const auto expressions{ AnalyzePredicate(predicate) };
 
-		if (vec.empty())
+		const auto suitableTasks{ m_tasksManager.SearchTasks(expressions) };
+
+		if (suitableTasks.empty())
 		{
 			throw "No suitable tasks found.";
 		}
 
-		for (auto taskRef : vec)
+		for (auto taskPtr : suitableTasks)
 		{
-			taskRef->Display();
+			taskPtr->Display();
 
 			std::cout << '\n';
 		}
@@ -261,111 +263,181 @@ void InputHandler::HandleSelect(const std::string_view argsView)
 	}
 }
 
-InputHandler::DividedInput
-InputHandler::GetCommandAndArguments(const std::string_view inpView)
+InputHandler::CommandAndArguments
+InputHandler::SplitCommandAndArguments(const std::string_view line)
 {
-	DividedInput retVal;
+	CommandAndArguments retStruct;
 
-	size_t first = 0;
-	size_t second = inpView.find_first_of(" ", first);
-	if (second != std::string_view::npos)
+	if (line.empty())
 	{
-		retVal.command = inpView.substr(first, second - first);
+		return retStruct;
 	}
 
-	first = second + 1;
-	second = inpView.size();
+	size_t indx = 0;
+	size_t indx2 = line.find_first_of(' ', indx);
 
-	retVal.arguments = inpView.substr(first, second - first);
+	if (indx2 == std::string_view::npos)
+	{
+		retStruct.command = line.substr(indx, line.size());
 
-	return retVal;
+		return retStruct;
+	}
+
+	retStruct.command = line.substr(indx, indx2 - indx);
+
+	indx = indx2 + 1;
+	indx2 = line.size();
+
+	retStruct.arguments = line.substr(indx, indx2 - indx);
+
+	return retStruct;
 }
 
-const std::vector<std::string_view>
-InputHandler::SplitIntoWords(const std::string_view inpView)
+std::vector<std::string_view>
+InputHandler::SplitIntoWords(const std::string_view line)
 {
-	std::vector<std::string_view> wordViews;
+	std::vector<std::string_view> words;
 
-	size_t first = 0;
-
-	while (first < inpView.size())
+	if (line.empty())
 	{
-		size_t second = 0;
+		return words;
+	}
 
-		if (inpView[first] == '"')
+	size_t indx = line.find_first_not_of(' ', 0);
+
+	if (indx == std::string_view::npos)
+	{
+		return words;
+	}
+
+	size_t indx2 = 0;
+	size_t end = line.size();
+
+	while (indx < end)
+	{
+		if (line[indx] == '\"')
 		{
-			second = inpView.find_first_of('"', first + 1);
+			indx2 = indx;
 
-			wordViews.emplace_back(inpView.substr(first, second - first + 1));
+			while (true)
+			{
+				indx2 = line.find_first_of('\"', indx2 + 1);
+
+				if (indx2 != std::string_view::npos)
+				{
+					if (indx2 < end - 1)
+					{
+						if (line[indx2 + 1] == ' ')
+						{
+							if (indx2 != indx + 1)
+							{
+								words.push_back(line.substr(indx + 1, indx2 - indx - 1));
+							}
+
+							indx = indx2 + 2;
+							break;
+						}
+						else
+						{
+							indx2 += 1;
+							continue;
+						}
+					}
+					else
+					{
+						if (indx2 != indx + 1)
+						{
+							words.push_back(line.substr(indx + 1, indx2 - indx - 1));
+						}
+
+						indx = end;
+						break;
+					}
+				}
+				else
+				{
+					indx2 = line.find_first_of(' ', indx);
+
+					if (indx2 != std::string_view::npos)
+					{
+						words.push_back(line.substr(indx, indx2 - indx));
+					}
+					else
+					{
+						words.push_back(line.substr(indx, end - indx));
+					}
+
+					break;
+				}
+			}
 		}
 		else
 		{
-			second = inpView.find_first_of(" ", first);
+			indx2 = line.find_first_of(' ', indx);
 
-			if (first != second)
-				wordViews.emplace_back(inpView.substr(first, second - first));
+			if (indx2 != std::string_view::npos)
+			{
+				words.push_back(line.substr(indx, indx2 - indx));				
+			}
+			else
+			{
+				words.push_back(line.substr(indx, end - indx));
+			}
 		}
 
-		if (second == std::string_view::npos)
+		if (indx2 == std::string_view::npos)
 		{
 			break;
 		}
 
-		first = second + 1;
+		indx = line.find_first_not_of(' ', indx2 + 1);
 	}
 
-	return wordViews;
+	return words;
 }
 
-std::string_view InputHandler::Unquoted(const std::string_view inpView)
+std::string_view InputHandler::Unquoted(const std::string_view line)
 {	
-	const size_t inpLength = inpView.length();
+	const size_t lineLength = line.length();
 
-	std::string_view retView;
-
-	if (inpLength == 0)
+	std::string_view unquotedLine;
+	
+	if (lineLength <= 2)
 	{
-		return retView;
-	}
-	else if (inpLength <= 2)
-	{
-		retView = inpView;
-	}
-	else if (inpView[0] != '\"')
-	{
-		retView = inpView;
-	}
-	else if (inpView[0] == '\"' && inpView[inpLength - 1] != '\"')
-	{
-		retView = inpView;
-	}
-	else
-	{
-		retView = inpView.substr(1, inpLength - 2);
+		return line;
 	}
 
-	return retView;
+	if (line[0] != '\"' || line[lineLength - 1] != '\"')
+	{
+		return line;
+	}
+
+	unquotedLine = line.substr(1, lineLength - 2);
+
+	return unquotedLine;
 }
 
-std::string InputHandler::ReadField(const std::string_view fieldNameView)
+std::string InputHandler::ReadField(const std::string_view fieldName)
 {
 	std::string inputLine;
-	std::string_view unqInpLineView;
+	std::string_view unquotedInputLine;
 
-	if (!fieldNameView.empty())
-		std::cout << fieldNameView << ": ";
+	if (!fieldName.empty())
+	{
+		std::cout << fieldName << ": ";
+	}
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
-		unqInpLineView = Unquoted(inputLine);
+		unquotedInputLine = Unquoted(inputLine);
 
-		if (unqInpLineView.empty())
+		if (unquotedInputLine.empty())
 		{
 			std::cout << "Try again: ";
 			continue;
 		}
 
-		if (unqInpLineView.find('\"') != std::string_view::npos)
+		if (unquotedInputLine.find('\"') != std::string_view::npos)
 		{
 			std::cout << "Incorrect usage of quotes!" << '\n';
 			std::cout << "Try again: ";
@@ -375,26 +447,26 @@ std::string InputHandler::ReadField(const std::string_view fieldNameView)
 		break;
 	}
 
-	return inputLine;
+	return std::string{ unquotedInputLine };
 }
 
-std::string InputHandler::ReadName(const std::string_view argNameView)
+std::string InputHandler::ReadName(const std::string_view taskName)
 {
-	std::string retName;
+	std::string newName;
 
 	std::cout << "name: ";
 
 	while (true)
 	{
-		retName = ReadField();
+		newName = ReadField();
 
-		const auto unqName(Unquoted(retName));
+		const auto unquotedNewName(Unquoted(newName));
 
-		if (unqName == Unquoted(argNameView))
+		if (unquotedNewName == Unquoted(taskName))
 		{
 			break;
 		}
-		else if (m_tasksManager.ContainsTask(unqName))
+		else if (m_tasksManager.ContainsTask(unquotedNewName))
 		{
 			std::cout << "This task already exists!" << std::endl;
 			std::cout << "Try again: ";
@@ -406,7 +478,7 @@ std::string InputHandler::ReadName(const std::string_view argNameView)
 		}
 	}
 
-	return retName;
+	return std::string{ newName };
 }
 
 DateTime InputHandler::ReadDateTime()  
@@ -430,23 +502,24 @@ DateTime InputHandler::ReadDateTime()
 	}
 }
 
-const TasksManager::SearchMap
-InputHandler::AnalyzePredicate(const std::string_view predView)
+const std::set<TasksManager::Expression>
+InputHandler::AnalyzePredicate(const std::string_view predicate)
 {
-	TasksManager::SearchMap retMap;
-	TasksManager::SearchPair tmpPair;
-
-	size_t end = predView.length();
+	size_t end = predicate.length();
 	size_t i = 0;
+
+	std::set<TasksManager::Expression> expressions;
+
+	TasksManager::Expression tmpExpression;
 
 	while (i < end)
 	{
-		if (predView[i] == ' ')
+		if (predicate[i] == ' ')
 		{
 			i++;
 		}
-		else if (predView[i] == '<' || predView[i] == '=' ||
-			     predView[i] == '>' || predView[i] == '"')
+		else if (predicate[i] == '<' || predicate[i] == '=' ||
+			 predicate[i] == '>' || predicate[i] == '"')
 		{
 			throw "Incorrect predicate!";
 		}
@@ -454,13 +527,13 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 		{
 			for (size_t j = i; j < end; j++)
 			{
-				if (predView[j] == ' ')
+				if (predicate[j] == ' ')
 				{
-					const auto word = predView.substr(i, j - i);
+					const auto word = predicate.substr(i, j - i);
 
 					if (word == "and")
 					{
-						if (retMap.empty())
+						if (expressions.empty())
 						{
 							throw "The word \'and\' should not be the first word in predicate!";
 						}
@@ -475,60 +548,60 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 					}
 					else
 					{
-						tmpPair.first = word;
+						tmpExpression.field = word;
 
-						const auto result = ReadSelectOperator(predView, j + 1);
+						const auto resOperator = ReadOperatorFromPredicate(predicate, j + 1);
 
-						tmpPair.second.first = result.operatr;
+						tmpExpression.operatr = resOperator.operatr;
 
-						const auto result2 = ReadSelectValue(predView, result.indexAfterOperator);
+						const auto resValue = ReadValueFromPredicate(predicate, resOperator.indexAfterOperator);
 
-						tmpPair.second.second = Unquoted(result2.value);
+						tmpExpression.value = resValue.value;
 
-						i = result2.indexAfterValue;
+						i = resValue.indexAfterValue;
 					}
 
-					if (!retMap.emplace(tmpPair).second)
+					if (!expressions.insert(tmpExpression).second)
 					{
 						throw "You cannot enter one field several times in predicate!";
 					}
 
-					tmpPair = {};
+					tmpExpression = {};
 
 					break;
 				}
-				else if (predView[j] == '<' || predView[j] == '=' || predView[j] == '>')
+				else if (predicate[j] == '<' || predicate[j] == '=' || predicate[j] == '>')
 				{
 					if (j == end - 1)
 					{
 						throw "No value after operator!";
 					}
 
-					tmpPair.first = predView.substr(i, j - i);
+					tmpExpression.field = predicate.substr(i, j - i);
 					
-					if (predView[j + 1] == '=')
+					if (predicate[j + 1] == '=')
 					{
-						tmpPair.second.first = predView.substr(j, 2);
+						tmpExpression.operatr = predicate.substr(j, 2);
 						j += 2;
 					}
 					else
 					{
-						tmpPair.second.first = predView.substr(j, 1);
+						tmpExpression.operatr = predicate.substr(j, 1);
 						j++;
 					}
 
-					const auto result = ReadSelectValue(predView, j);
+					const auto resValue = ReadValueFromPredicate(predicate, j);
 
-					tmpPair.second.second = Unquoted(result.value);
+					tmpExpression.value = resValue.value;
 
-					i = result.indexAfterValue;
+					i = resValue.indexAfterValue;
 
-					if (!retMap.emplace(tmpPair).second)
+					if (!expressions.insert(tmpExpression).second)
 					{
 						throw "You cannot enter one field several times in predicate!";
 					}
 
-					tmpPair = {};
+					tmpExpression = {};
 
 					break;
 				}
@@ -541,60 +614,60 @@ InputHandler::AnalyzePredicate(const std::string_view predView)
 		}
 	}
 
-	if (retMap.empty())
+	if (expressions.empty())
 	{
 		throw "Predicate is empty!";
 	}
 
-	return retMap;
+	return expressions;
 }
 
-InputHandler::RetSelOperator
-InputHandler::ReadSelectOperator(const std::string_view predView, const size_t startPos)
+InputHandler::OperatorAndIndex
+InputHandler::ReadOperatorFromPredicate(const std::string_view predicate, const size_t startPos)
 {
-	auto indx = predView.find_first_not_of(' ', startPos);
-	auto end = predView.size();
+	auto indx = predicate.find_first_not_of(' ', startPos);
+	auto end = predicate.size();
 
-	RetSelOperator retStruct;
+	OperatorAndIndex operatorAndIndex;
 
 	if (indx == std::string_view::npos)
 	{
 		throw "No operator after field name!";
 	}
 
-	auto indx2 = predView.find_first_of(' ', indx + 1);
+	auto indx2 = predicate.find_first_of(' ', indx + 1);
 
 	if (indx2 == std::string_view::npos)
 	{
 		throw "No value after operator!";
 	}
 
-	retStruct.operatr = predView.substr(indx, indx2 - indx);
+	operatorAndIndex.operatr = predicate.substr(indx, indx2 - indx);
 
-	retStruct.indexAfterOperator = indx2 + 1;
+	operatorAndIndex.indexAfterOperator = indx2 + 1;
 
-	return retStruct;
+	return operatorAndIndex;
 }
 
-InputHandler::RetSelValue
-InputHandler::ReadSelectValue(const std::string_view predView, const size_t startPos)
+InputHandler::ValueAndIndex
+InputHandler::ReadValueFromPredicate(const std::string_view predicate, const size_t startPos)
 {
-	const auto indx = predView.find_first_not_of(' ', startPos);
-	auto end = predView.size();
+	const auto indx = predicate.find_first_not_of(' ', startPos);
+	auto end = predicate.size();
 
-	RetSelValue retStruct;
+	ValueAndIndex valueAndIndex;
 
 	if (indx == std::string_view::npos)
 	{
 		throw "No value after operator!";
 	}
 
-	if (predView[indx] != '\"')
+	if (predicate[indx] != '\"')
 	{
 		throw "Value after operator must be in quotes!";
 	}
 
-	auto indx2 = predView.find_first_of('\"', indx + 1);
+	auto indx2 = predicate.find_first_of('\"', indx + 1);
 
 	if (indx2 == std::string_view::npos)
 	{
@@ -608,15 +681,15 @@ InputHandler::ReadSelectValue(const std::string_view predView, const size_t star
 
 	if (indx2 < end - 1)
 	{
-		if (predView[indx2 + 1] != ' ')
+		if (predicate[indx2 + 1] != ' ')
 		{
 			throw "Incorrect usage of quotes in predicate!";
 		}
 	}
 
-	retStruct.value = predView.substr(indx, indx2 - indx + 1);
+	valueAndIndex.value = predicate.substr(indx + 1, indx2 - indx - 1);
 
-	retStruct.indexAfterValue = indx2 + 1;
+	valueAndIndex.indexAfterValue = indx2 + 1;
 
-	return retStruct;
+	return valueAndIndex;
 }

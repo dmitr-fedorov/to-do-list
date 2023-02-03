@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-Task::Task(const std::string_view name, const std::string_view descr,
-	const DateTime& dateTime, const std::string_view categ)
-	: m_name(name), m_description(descr), m_dateTime(dateTime), m_category(categ), m_status("on")
+Task::Task(const std::string_view name, const std::string_view description,
+	const DateTime& dateTime, const std::string_view category)
+	: m_name(name), m_description(description), m_dateTime(dateTime), m_category(category), m_status("on")
 {
 	
 }
@@ -19,11 +19,11 @@ void Task::SetDone()
 	m_status = "done";
 }
 
-void Task::Update(const std::string_view descr, const DateTime& dateTime, const std::string_view categ)
+void Task::Update(const std::string_view description, const DateTime& dateTime, const std::string_view category)
 {
-	m_description = descr;
+	m_description = description;
 	m_dateTime = dateTime;
-	m_category = categ;
+	m_category = category;
 }
 
 void Task::Display() const
