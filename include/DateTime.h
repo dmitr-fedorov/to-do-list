@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <iostream>
+#include <string_view>
 
 /*
    Класс, который представляет собой дату (год, месяц, день) и время (часы и минуты).

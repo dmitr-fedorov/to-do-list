@@ -1,7 +1,8 @@
 ﻿#include "InputHandler.h"
 
 #include <iostream>
-#include <sstream>
+
+#include "InputAnalysisTools.h"
 
 const std::string InputHandler::M_CONST_STRING_EXIT = "q";
 const std::string InputHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(")
@@ -32,7 +33,7 @@ int InputHandler::StartReading()
 
 		try
 		{
-			const auto cmdAndArgs{ SplitCommandAndArguments(inputLine) };
+			const auto cmdAndArgs{ InputAnalysisTools::SplitCommandAndArguments(inputLine) };
 
 			const auto command  { cmdAndArgs.command };
 			const auto arguments{ cmdAndArgs.arguments };
@@ -88,7 +89,7 @@ void InputHandler::HandleAdd(const std::string_view arguments)
 	
 	try
 	{
-		const auto fields{ SplitIntoWords(arguments) };
+		const auto fields{ InputAnalysisTools::SplitIntoWords(arguments) };
 
 		if (fields.size() != NUM_REQUIRED_ARGS)
 		{
@@ -151,13 +152,13 @@ void InputHandler::HandleUpdate(const std::string_view taskName)
 
 		std::cout << "Please, enter new fields." << '\n';
 
-		const auto newName{ ReadName(unquotedName) };
+		const auto newName{ ReadTaskName(unquotedName) };
 
-		const auto newDescription{ ReadField("description") };
+		const auto newDescription{ ReadFieldValue("description") };
 
 		const auto newDateTime{ ReadDateTime() };
 
-		const auto newCategory{ ReadField("category") };
+		const auto newCategory{ ReadFieldValue("category") };
 		
 		if (unquotedName != newName)
 		{
@@ -200,6 +201,11 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 {
 	try
 	{
+		if (m_tasksManager.TaskCount() == 0)
+		{
+			throw "Task list is empty!";
+		}
+
 		const auto indx = arguments.find_first_not_of(" ", 0);
 
 		if (indx == std::string_view::npos)
@@ -209,7 +215,7 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 
 		if (arguments[indx] != '*')
 		{
-			throw "After \'select\' must come the symbol \'*\'!";
+			throw "After \'select\' must come the character \'*\'!";
 		}
 
 		const auto indx2 = arguments.find_first_not_of(" ", indx + 1);
@@ -223,7 +229,7 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 
 		if (indx2 == indx + 1)
 		{
-			throw "Symbols right after \'*\' are not allowed!";
+			throw "Characters right after \'*\' are not allowed!";
 		}
 
 		const auto indx3 = arguments.find_first_of(" ", indx2);
@@ -240,16 +246,16 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 
 		const auto predicate{ arguments.substr(indx3, arguments.size() - indx3) };
 
-		const auto expressions{ AnalyzePredicate(predicate) };
+		const auto expressions{ InputAnalysisTools::AnalyzePredicate(predicate) };
 
-		const auto suitableTasks{ m_tasksManager.SearchTasks(expressions) };
+		const auto relevantTasks{ m_tasksManager.SearchTasks(expressions) };
 
-		if (suitableTasks.empty())
+		if (relevantTasks.empty())
 		{
-			throw "No suitable tasks found.";
+			throw "No relevant tasks found.";
 		}
 
-		for (auto taskPtr : suitableTasks)
+		for (auto taskPtr : relevantTasks)
 		{
 			taskPtr->Display();
 
@@ -261,139 +267,6 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 		std::cout <<  msg << std::endl;
 		return;
 	}
-}
-
-InputHandler::CommandAndArguments
-InputHandler::SplitCommandAndArguments(const std::string_view line)
-{
-	CommandAndArguments retStruct;
-
-	if (line.empty())
-	{
-		return retStruct;
-	}
-
-	size_t indx = 0;
-	size_t indx2 = line.find_first_of(' ', indx);
-
-	if (indx2 == std::string_view::npos)
-	{
-		retStruct.command = line.substr(indx, line.size());
-
-		return retStruct;
-	}
-
-	retStruct.command = line.substr(indx, indx2 - indx);
-
-	indx = indx2 + 1;
-	indx2 = line.size();
-
-	retStruct.arguments = line.substr(indx, indx2 - indx);
-
-	return retStruct;
-}
-
-std::vector<std::string_view>
-InputHandler::SplitIntoWords(const std::string_view line)
-{
-	std::vector<std::string_view> words;
-
-	if (line.empty())
-	{
-		return words;
-	}
-
-	size_t indx = line.find_first_not_of(' ', 0);
-
-	if (indx == std::string_view::npos)
-	{
-		return words;
-	}
-
-	size_t indx2 = 0;
-	size_t end = line.size();
-
-	while (indx < end)
-	{
-		if (line[indx] == '\"')
-		{
-			indx2 = indx;
-
-			while (true)
-			{
-				indx2 = line.find_first_of('\"', indx2 + 1);
-
-				if (indx2 != std::string_view::npos)
-				{
-					if (indx2 < end - 1)
-					{
-						if (line[indx2 + 1] == ' ')
-						{
-							if (indx2 != indx + 1)
-							{
-								words.push_back(line.substr(indx + 1, indx2 - indx - 1));
-							}
-
-							indx = indx2 + 2;
-							break;
-						}
-						else
-						{
-							indx2 += 1;
-							continue;
-						}
-					}
-					else
-					{
-						if (indx2 != indx + 1)
-						{
-							words.push_back(line.substr(indx + 1, indx2 - indx - 1));
-						}
-
-						indx = end;
-						break;
-					}
-				}
-				else
-				{
-					indx2 = line.find_first_of(' ', indx);
-
-					if (indx2 != std::string_view::npos)
-					{
-						words.push_back(line.substr(indx, indx2 - indx));
-					}
-					else
-					{
-						words.push_back(line.substr(indx, end - indx));
-					}
-
-					break;
-				}
-			}
-		}
-		else
-		{
-			indx2 = line.find_first_of(' ', indx);
-
-			if (indx2 != std::string_view::npos)
-			{
-				words.push_back(line.substr(indx, indx2 - indx));				
-			}
-			else
-			{
-				words.push_back(line.substr(indx, end - indx));
-			}
-		}
-
-		if (indx2 == std::string_view::npos)
-		{
-			break;
-		}
-
-		indx = line.find_first_not_of(' ', indx2 + 1);
-	}
-
-	return words;
 }
 
 std::string_view InputHandler::Unquoted(const std::string_view line)
@@ -417,7 +290,7 @@ std::string_view InputHandler::Unquoted(const std::string_view line)
 	return unquotedLine;
 }
 
-std::string InputHandler::ReadField(const std::string_view fieldName)
+std::string InputHandler::ReadFieldValue(const std::string_view fieldName)
 {
 	std::string inputLine;
 	std::string_view unquotedInputLine;
@@ -450,7 +323,7 @@ std::string InputHandler::ReadField(const std::string_view fieldName)
 	return std::string{ unquotedInputLine };
 }
 
-std::string InputHandler::ReadName(const std::string_view taskName)
+std::string InputHandler::ReadTaskName(const std::string_view taskName)
 {
 	std::string newName;
 
@@ -458,7 +331,7 @@ std::string InputHandler::ReadName(const std::string_view taskName)
 
 	while (true)
 	{
-		newName = ReadField();
+		newName = ReadFieldValue();
 
 		const auto unquotedNewName(Unquoted(newName));
 
@@ -500,196 +373,4 @@ DateTime InputHandler::ReadDateTime()
 			continue;
 		}
 	}
-}
-
-const std::set<TasksManager::Expression>
-InputHandler::AnalyzePredicate(const std::string_view predicate)
-{
-	size_t end = predicate.length();
-	size_t i = 0;
-
-	std::set<TasksManager::Expression> expressions;
-
-	TasksManager::Expression tmpExpression;
-
-	while (i < end)
-	{
-		if (predicate[i] == ' ')
-		{
-			i++;
-		}
-		else if (predicate[i] == '<' || predicate[i] == '=' ||
-			 predicate[i] == '>' || predicate[i] == '"')
-		{
-			throw "Incorrect predicate!";
-		}
-		else
-		{
-			for (size_t j = i; j < end; j++)
-			{
-				if (predicate[j] == ' ')
-				{
-					const auto word = predicate.substr(i, j - i);
-
-					if (word == "and")
-					{
-						if (expressions.empty())
-						{
-							throw "The word \'and\' should not be the first word in predicate!";
-						}
-						
-						i = j + 1;
-
-						break;						
-					}
-					else if (word == "like")
-					{
-						throw "Incorrect usage of word \'like\'!";
-					}
-					else
-					{
-						tmpExpression.field = word;
-
-						const auto resOperator = ReadOperatorFromPredicate(predicate, j + 1);
-
-						tmpExpression.operatr = resOperator.operatr;
-
-						const auto resValue = ReadValueFromPredicate(predicate, resOperator.indexAfterOperator);
-
-						tmpExpression.value = resValue.value;
-
-						i = resValue.indexAfterValue;
-					}
-
-					if (!expressions.insert(tmpExpression).second)
-					{
-						throw "You cannot enter one field several times in predicate!";
-					}
-
-					tmpExpression = {};
-
-					break;
-				}
-				else if (predicate[j] == '<' || predicate[j] == '=' || predicate[j] == '>')
-				{
-					if (j == end - 1)
-					{
-						throw "No value after operator!";
-					}
-
-					tmpExpression.field = predicate.substr(i, j - i);
-					
-					if (predicate[j + 1] == '=')
-					{
-						tmpExpression.operatr = predicate.substr(j, 2);
-						j += 2;
-					}
-					else
-					{
-						tmpExpression.operatr = predicate.substr(j, 1);
-						j++;
-					}
-
-					const auto resValue = ReadValueFromPredicate(predicate, j);
-
-					tmpExpression.value = resValue.value;
-
-					i = resValue.indexAfterValue;
-
-					if (!expressions.insert(tmpExpression).second)
-					{
-						throw "You cannot enter one field several times in predicate!";
-					}
-
-					tmpExpression = {};
-
-					break;
-				}
-
-				if (j == end - 1)
-				{
-					throw "Incorrect predicate!";
-				}
-			}
-		}
-	}
-
-	if (expressions.empty())
-	{
-		throw "Predicate is empty!";
-	}
-
-	return expressions;
-}
-
-InputHandler::OperatorAndIndex
-InputHandler::ReadOperatorFromPredicate(const std::string_view predicate, const size_t startPos)
-{
-	auto indx = predicate.find_first_not_of(' ', startPos);
-	auto end = predicate.size();
-
-	OperatorAndIndex operatorAndIndex;
-
-	if (indx == std::string_view::npos)
-	{
-		throw "No operator after field name!";
-	}
-
-	auto indx2 = predicate.find_first_of(' ', indx + 1);
-
-	if (indx2 == std::string_view::npos)
-	{
-		throw "No value after operator!";
-	}
-
-	operatorAndIndex.operatr = predicate.substr(indx, indx2 - indx);
-
-	operatorAndIndex.indexAfterOperator = indx2 + 1;
-
-	return operatorAndIndex;
-}
-
-InputHandler::ValueAndIndex
-InputHandler::ReadValueFromPredicate(const std::string_view predicate, const size_t startPos)
-{
-	const auto indx = predicate.find_first_not_of(' ', startPos);
-	auto end = predicate.size();
-
-	ValueAndIndex valueAndIndex;
-
-	if (indx == std::string_view::npos)
-	{
-		throw "No value after operator!";
-	}
-
-	if (predicate[indx] != '\"')
-	{
-		throw "Value after operator must be in quotes!";
-	}
-
-	auto indx2 = predicate.find_first_of('\"', indx + 1);
-
-	if (indx2 == std::string_view::npos)
-	{
-		throw "Value after operator must be in quotes!";
-	}
-
-	if (indx2 == indx + 1)
-	{
-		throw "Value in quotes is empty!";
-	}
-
-	if (indx2 < end - 1)
-	{
-		if (predicate[indx2 + 1] != ' ')
-		{
-			throw "Incorrect usage of quotes in predicate!";
-		}
-	}
-
-	valueAndIndex.value = predicate.substr(indx + 1, indx2 - indx - 1);
-
-	valueAndIndex.indexAfterValue = indx2 + 1;
-
-	return valueAndIndex;
 }

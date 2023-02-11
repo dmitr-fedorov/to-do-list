@@ -22,7 +22,7 @@ DateTime::DateTime(const std::string_view dateTimeView)
 
     if (!DateTimeUtility::IsDateTimeFormatCorrect(dateTimeView))
     {
-        throw "Date and time format is incorrect! Suitable format: \"yyyy-mm-dd hh:mm\".";
+        throw "Date and time format is incorrect! Relevant format: \"yyyy-mm-dd hh:mm\".";
     }
 
     std::string str_year(dateTimeView.substr(YEAR_INDEX, YEAR_LENGTH));

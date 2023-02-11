@@ -4,7 +4,7 @@
 
 bool DateTimeUtility::IsDateTimeFormatCorrect(const std::string_view dateTimeView)
 {
-	static const int NUM_REQUIRED_SYMBOLS = 16;
+	static const int NUM_REQUIRED_CHARACTERS = 16;
 
 	static const int INDX_FIRST_DASH = 4;
 	static const int INDX_SECOND_DASH = 7;
@@ -13,7 +13,7 @@ bool DateTimeUtility::IsDateTimeFormatCorrect(const std::string_view dateTimeVie
 
 	const int end = dateTimeView.size();
 
-	if (end != NUM_REQUIRED_SYMBOLS)
+	if (end != NUM_REQUIRED_CHARACTERS)
 		return false;
 
 	for (int i = 0; i < end; i++)

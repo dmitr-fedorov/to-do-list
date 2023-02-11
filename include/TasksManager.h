@@ -1,10 +1,9 @@
 ﻿#pragma once
 
+#include <string_view>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
-#include <utility>
 
 #include "Task.h"
 
@@ -78,6 +77,11 @@ public:
 	  Выводит все задачи в консоль.
 	*/
 	void DisplayAllTasks() const;
+
+	/*
+	  Вовзращает количество задач в контейнере.
+	*/
+	int TaskCount();
 
 	/*
 	  Выполняет отбор задач, которые соответствуют выражениям из expressions.

@@ -2,9 +2,6 @@
 
 #include <string_view>
 #include <string>
-#include <vector>
-#include <set>
-#include <utility>
 
 #include "TasksManager.h"
 
@@ -25,31 +22,6 @@ public:
 	int StartReading();
 
 private:
-    struct CommandAndArguments
-    {
-    	std::string_view command;
-    	std::string_view arguments;
-    };
-
-    struct OperatorAndIndex
-    {
-    	// Оператор, с помощью которого будет производиться поиск.
-    	std::string_view operatr;
-    
-        // Индекс следующего после оператора символа в предикате.
-    	size_t indexAfterOperator{ std::string_view::npos };
-    };
-
-    struct ValueAndIndex
-    {
-    	// Значение, по которому будет производится поиск.
-    	// Оно заключено в кавычки.
-    	std::string_view value;
-    
-        // индекс следующего после значения символа в предикате.
-    	size_t indexAfterValue{ std::string_view::npos };
-    };
-    
 	/*
 	  Строка, при вводе которой в консоль приложение завершает работу.
 	*/
@@ -93,19 +65,6 @@ private:
 	void HandleSelect(const std::string_view arguments);
 
 	/*
-	  Делит строку line на две части: команду и аргументы.
-	  Возвращает структуру с разделенным вводом.
-	*/
-	CommandAndArguments SplitCommandAndArguments(const std::string_view line);
-
-	/*
-	  Разделяет строку line на отдельные слова и возвращает контейнер с этими словами.
-	  Каждая подстрока, заключенная в кавычки и отделенная от других слов пробелами с обеих сторон,
-	  считается одним словом. Такие слова заносятся в контейнер без кавычек в начале и конце.
-	*/
-	std::vector<std::string_view> SplitIntoWords(const std::string_view line);
-
-	/*
 	  Если строка line заключена в кавычки, и между кавычек есть хотя бы один символ,
 	  то метод возвращает эту строку без кавычек.
 	  В противном случает возвращает эту строку без изменений.
@@ -121,7 +80,7 @@ private:
 	  Возвращает введенную строку.
 	  Если введенная строка заключена в кавычки, то возвращает ее без кавычек с обеих сторон.
 	*/
-	std::string ReadField(const std::string_view fieldName = "");
+	std::string ReadFieldValue(const std::string_view fieldName = "");
 	/*
 	  Выводит в консоль приглашение на ввод нового имени задачи с именем taskName,
 	  считывает и анализирует ввод.
@@ -129,35 +88,11 @@ private:
 	  Возвращает введенную строку.
 	  Если введенная строка заключена в кавычки, то возвращает ее без кавычек с обеих сторон.
 	*/
-	std::string ReadName(const std::string_view taskName);
+	std::string ReadTaskName(const std::string_view taskName);
 	/*
 	  Выводит в консоль приглашение на ввод даты, считывает и анализирует ввод.
 	  В случае некорректного ввода метод выводит сообщение об этом и просит повторить попытку.
 	  Возвращает объект DateTime, сформированный из введенной строки.
 	*/
 	DateTime ReadDateTime();
-
-	/*
-	  Анализирует предикат predicate и возвращает выражения из этого предиката.
-	  Если пользователь ввел некорректный предикат, то выбрасывает исключение const char*
-	  с описанием того, какая часть ввода была некорректной.
-	*/
-	const std::set<TasksManager::Expression> AnalyzePredicate(const std::string_view predicate);
-	/*
-	  Считывает оператор из predicate начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением, если оператор отсутствует, или если после оператора нет значения.
-	  Возвращает структуру, со считанным оператором и индексом места в predicate, где заканчивается этот оператор.
-	*/
-	OperatorAndIndex ReadOperatorFromPredicate(const std::string_view predicate, const size_t startPos);
-	/*
-	  Считывает значение поиска из predicate начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением в следующих случаях:
-	  - В строке нет значения;
-	  - Значение не заключено в кавычки;
-	  - В значении есть избыточные кавычки;
-	  - В кавычках нет значения.
-	  Возвращает структуру, со считанным значением без кавычек с обеих сторон,
-	  и c индексом места в predicate, где заканчивается это значение.
-	*/
-	ValueAndIndex ReadValueFromPredicate(const std::string_view predicate, const size_t startPos);
 };

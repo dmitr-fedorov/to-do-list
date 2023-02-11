@@ -1,6 +1,6 @@
 ﻿#include "TasksManager.h"
 
-#include <string_view>
+#include <iostream>
 
 TasksManager::TasksManager()
 {
@@ -73,10 +73,15 @@ void TasksManager::DisplayAllTasks() const
 	}
 }
 
+int TasksManager::TaskCount()
+{
+	return m_tasks.size();
+}
+
 std::vector<const Task*>
 TasksManager::SearchTasks(const std::set<Expression>& expressions) const
 {
-	std::vector<const Task*> suitableTasks;
+	std::vector<const Task*> relevantTasks;
 
 	for (const auto& containerElement : m_tasks)
 	{
@@ -123,10 +128,10 @@ TasksManager::SearchTasks(const std::set<Expression>& expressions) const
 			*/
 			if (expressions.find(expression) == std::prev(expressions.end()))
 			{
-				suitableTasks.push_back(&task);
+				relevantTasks.push_back(&task);
 			}
 		}
 	}
 
-	return suitableTasks;
+	return relevantTasks;
 }

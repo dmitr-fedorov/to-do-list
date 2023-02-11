@@ -30,14 +30,17 @@ add "Go to work" "My job is amazing, I love it" "2022-12-28 10:00" "Routine"
 
 - ### select * where {predicate}
 Отобразить задачи, которые подходят под критерии из *predicate*.  
-*predicate* должен состоять из выражений описывающих условие отбора задач: {имя поля} {оператор} {значение}.  
+*predicate* должен состоять из выражений, описывающих условие отбора задач: {имя поля} {оператор} {значение}.  
 Комбинация выражений возможна с помощью слова *and*.  
 Доступные операторы: like, <, <=, =, >=, >.  
 Оператор *like* ищет задачи с полями, которые содержат подстроку, которая идет после этого оператора.  
 Примеры использования команды:
 ```
-select * where name like "work"
+select * where name="Go to work"
 ```
 ```
-select * where name like "work" and date >= "2020-01-05 12:15" and status = "done"
+select * where description like "amazing"
+```
+```
+select * where name like "work" and date >= "2020-01-05 12:15"
 ```

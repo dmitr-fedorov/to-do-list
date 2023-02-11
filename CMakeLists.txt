@@ -5,11 +5,12 @@ project(ToDoList)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(ToDoList
-src/DateTime.cpp
 src/DateTimeUtility.cpp
+src/DateTime.cpp
 src/Task.cpp
-src/InputHandler.cpp
 src/TasksManager.cpp
+src/InputAnalysisTools.cpp
+src/InputHandler.cpp
 src/main.cpp
 )
 
