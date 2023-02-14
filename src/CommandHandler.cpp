@@ -1,24 +1,24 @@
-﻿#include "InputHandler.h"
+﻿#include "CommandHandler.h"
 
 #include <iostream>
 
 #include "InputAnalysisTools.h"
 
-const std::string InputHandler::M_CONST_STRING_EXIT = "q";
-const std::string InputHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(")
+const std::string CommandHandler::M_CONST_STRING_EXIT = "q";
+const std::string CommandHandler::M_CONST_STRING_ENTER_COMMAND = std::string("Enter command(")
                                                                  + M_CONST_STRING_EXIT + " to exit): ";
 
-InputHandler::InputHandler()
+CommandHandler::CommandHandler()
 {
 
 }
 
-InputHandler::~InputHandler()
+CommandHandler::~CommandHandler()
 {
 
 }
 
-int InputHandler::StartReading()
+int CommandHandler::StartReadingCommands()
 {
 	std::cout << M_CONST_STRING_ENTER_COMMAND;
 
@@ -35,8 +35,8 @@ int InputHandler::StartReading()
 		{
 			const auto cmdAndArgs{ InputAnalysisTools::SplitCommandAndArguments(inputLine) };
 
-			const auto command  { cmdAndArgs.command };
-			const auto arguments{ cmdAndArgs.arguments };
+			const std::string_view command  { cmdAndArgs.command };
+			const std::string_view arguments{ cmdAndArgs.arguments };
 
 			if (command == "add")
 			{
@@ -76,7 +76,7 @@ int InputHandler::StartReading()
 	return 0;
 }
 
-void InputHandler::HandleAdd(const std::string_view arguments)
+void CommandHandler::HandleAdd(const std::string_view arguments)
 {	
 	// Количество необходимых аргументов
 	static const int NUM_REQUIRED_ARGS = 4;
@@ -96,20 +96,20 @@ void InputHandler::HandleAdd(const std::string_view arguments)
 			throw "Incorrect number of arguments!";
 		}
 		
-		if (m_tasksManager.ContainsTask(fields[INDX_NAME]))
+		if (m_taskList.Contains(fields[INDX_NAME]))
 		{
 			throw "This task already exists!";
 		}
 
-		for (int i = 0; i < NUM_REQUIRED_ARGS; i++)
+		for (const std::string_view field : fields)
 		{
-			if (fields[i].find('\"') != std::string_view::npos)
+			if (field.find('\"') != std::string_view::npos)
 			{
 				throw "Incorrect usage of quotes in arguments!";
 			}
 		}
 
-		m_tasksManager.AddTask( fields[INDX_NAME], fields[INDX_DESCRIPTION],
+		m_taskList.Add( fields[INDX_NAME], fields[INDX_DESCRIPTION],
 			DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY] );
 	}
 	catch (const char* msg)
@@ -119,18 +119,18 @@ void InputHandler::HandleAdd(const std::string_view arguments)
 	}
 }
 
-void InputHandler::HandleDone(const std::string_view taskName)
+void CommandHandler::HandleDone(const std::string_view taskName)
 {
-	const auto unquotedName{ Unquoted(taskName) };
+	const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
 
 	try
 	{
-		if (!m_tasksManager.ContainsTask(unquotedName))
+		if (!m_taskList.Contains(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
 
-		m_tasksManager.SetTaskDone(unquotedName);
+		m_taskList.SetDone(unquotedName);
 	}
 	catch (const char* msg)
 	{
@@ -139,13 +139,13 @@ void InputHandler::HandleDone(const std::string_view taskName)
 	}
 }
 
-void InputHandler::HandleUpdate(const std::string_view taskName)
+void CommandHandler::HandleUpdate(const std::string_view taskName)
 {
 	try
 	{
-		const auto unquotedName{ Unquoted(taskName) };
+		const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
 
-		if (!m_tasksManager.ContainsTask(unquotedName))
+		if (!m_taskList.Contains(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
@@ -162,12 +162,12 @@ void InputHandler::HandleUpdate(const std::string_view taskName)
 		
 		if (unquotedName != newName)
 		{
-			m_tasksManager.ReplaceTask(unquotedName, newName, newDescription,
+			m_taskList.Replace(unquotedName, newName, newDescription,
 				newDateTime, newCategory);
 		}
 		else
 		{
-			m_tasksManager.UpdateTask(newName, newDescription, newDateTime, newCategory);
+			m_taskList.Update(newName, newDescription, newDateTime, newCategory);
 		}		
 	}
 	catch (const char* msg)
@@ -177,18 +177,18 @@ void InputHandler::HandleUpdate(const std::string_view taskName)
 	}
 }
 
-void InputHandler::HandleDelete(const std::string_view taskName)
+void CommandHandler::HandleDelete(const std::string_view taskName)
 {
-	const auto unquotedName = Unquoted(taskName);
+	const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
 
 	try
 	{
-		if (!m_tasksManager.ContainsTask(unquotedName))
+		if (!m_taskList.Contains(unquotedName))
 		{
 			throw "This task does not exist!";
 		}
 
-		m_tasksManager.DeleteTask(unquotedName);
+		m_taskList.Delete(unquotedName);
 	}
 	catch (const char* msg)
 	{
@@ -197,11 +197,11 @@ void InputHandler::HandleDelete(const std::string_view taskName)
 	}
 }
 
-void InputHandler::HandleSelect(const std::string_view arguments)
+void CommandHandler::HandleSelect(const std::string_view arguments)
 {
 	try
 	{
-		if (m_tasksManager.TaskCount() == 0)
+		if (m_taskList.Count() == 0)
 		{
 			throw "Task list is empty!";
 		}
@@ -222,7 +222,7 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 
 		if (indx2 == std::string_view::npos)
 		{
-			m_tasksManager.DisplayAllTasks();
+			m_taskList.DisplayAll();
 
 			return;
 		}
@@ -248,7 +248,7 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 
 		const auto expressions{ InputAnalysisTools::AnalyzePredicate(predicate) };
 
-		const auto relevantTasks{ m_tasksManager.SearchTasks(expressions) };
+		const auto relevantTasks{ m_taskList.Find(expressions) };
 
 		if (relevantTasks.empty())
 		{
@@ -269,28 +269,7 @@ void InputHandler::HandleSelect(const std::string_view arguments)
 	}
 }
 
-std::string_view InputHandler::Unquoted(const std::string_view line)
-{	
-	const size_t lineLength = line.length();
-
-	std::string_view unquotedLine;
-	
-	if (lineLength <= 2)
-	{
-		return line;
-	}
-
-	if (line[0] != '\"' || line[lineLength - 1] != '\"')
-	{
-		return line;
-	}
-
-	unquotedLine = line.substr(1, lineLength - 2);
-
-	return unquotedLine;
-}
-
-std::string InputHandler::ReadFieldValue(const std::string_view fieldName)
+std::string CommandHandler::ReadFieldValue(const std::string_view fieldName)
 {
 	std::string inputLine;
 	std::string_view unquotedInputLine;
@@ -302,7 +281,7 @@ std::string InputHandler::ReadFieldValue(const std::string_view fieldName)
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
-		unquotedInputLine = Unquoted(inputLine);
+		unquotedInputLine = InputAnalysisTools::Unquoted(inputLine);
 
 		if (unquotedInputLine.empty())
 		{
@@ -323,9 +302,10 @@ std::string InputHandler::ReadFieldValue(const std::string_view fieldName)
 	return std::string{ unquotedInputLine };
 }
 
-std::string InputHandler::ReadTaskName(const std::string_view taskName)
+std::string CommandHandler::ReadTaskName(const std::string_view taskName)
 {
 	std::string newName;
+	const auto unquotedOldName{ InputAnalysisTools::Unquoted(taskName) };
 
 	std::cout << "name: ";
 
@@ -333,13 +313,13 @@ std::string InputHandler::ReadTaskName(const std::string_view taskName)
 	{
 		newName = ReadFieldValue();
 
-		const auto unquotedNewName(Unquoted(newName));
+		const auto unquotedNewName{ InputAnalysisTools::Unquoted(newName) };
 
-		if (unquotedNewName == Unquoted(taskName))
+		if (unquotedNewName == unquotedOldName)
 		{
 			break;
 		}
-		else if (m_tasksManager.ContainsTask(unquotedNewName))
+		else if (m_taskList.Contains(unquotedNewName))
 		{
 			std::cout << "This task already exists!" << std::endl;
 			std::cout << "Try again: ";
@@ -354,7 +334,7 @@ std::string InputHandler::ReadTaskName(const std::string_view taskName)
 	return std::string{ newName };
 }
 
-DateTime InputHandler::ReadDateTime()  
+DateTime CommandHandler::ReadDateTime()
 {
 	std::string inputLine;
 
@@ -364,7 +344,7 @@ DateTime InputHandler::ReadDateTime()
 	{
 		try
 		{
-			return DateTime( Unquoted(inputLine) );
+			return DateTime{ InputAnalysisTools::Unquoted(inputLine) };
 		}
 		catch (const char* msg)
 		{

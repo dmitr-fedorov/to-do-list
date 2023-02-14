@@ -11,7 +11,7 @@ namespace
 
 	struct ExpressionAndIndex
 	{
-		TasksManager::Expression expression;
+		TaskList::Expression expression;
 
 		size_t indexAfterExpression = std::string_view::npos;
 	};
@@ -282,6 +282,28 @@ namespace
 	}
 };
 
+std::string_view
+InputAnalysisTools::Unquoted(const std::string_view line)
+{
+	const size_t lineLength = line.length();
+
+	std::string_view unquotedLine;
+
+	if (lineLength <= 2)
+	{
+		return line;
+	}
+
+	if (line[0] != '\"' || line[lineLength - 1] != '\"')
+	{
+		return line;
+	}
+
+	unquotedLine = line.substr(1, lineLength - 2);
+
+	return unquotedLine;
+}
+
 InputAnalysisTools::CommandAndArguments
 InputAnalysisTools::SplitCommandAndArguments(const std::string_view line)
 {
@@ -352,12 +374,12 @@ InputAnalysisTools::SplitIntoWords(const std::string_view line)
 	return words;
 }
 
-const std::set<TasksManager::Expression>
+const std::set<TaskList::Expression>
 InputAnalysisTools::AnalyzePredicate(const std::string_view predicate)
 {
 	const auto end = predicate.size();
 
-	std::set<TasksManager::Expression> expressions;
+	std::set<TaskList::Expression> expressions;
 
 	for (size_t indx = 0; indx < end;)
 	{

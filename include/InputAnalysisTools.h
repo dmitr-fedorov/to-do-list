@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-#include "TasksManager.h"
+#include "TaskList.h"
 
 namespace InputAnalysisTools
 {
@@ -13,6 +13,13 @@ namespace InputAnalysisTools
         std::string_view command;
         std::string_view arguments;
     };
+
+    /*
+      Если строка line заключена в кавычки, и между кавычек есть хотя бы один символ,
+      то метод возвращает эту строку без кавычек.
+      В противном случае возвращает эту строку без изменений.
+    */
+    std::string_view Unquoted(const std::string_view line);
 
     /*
       Делит строку line на две части: команду и аргументы.
@@ -32,5 +39,5 @@ namespace InputAnalysisTools
       Если в функцию был передан некорректный предикат, то выбрасывает
       исключение const char* с описанием того, какая часть предиката не является корректной.
     */
-    const std::set<TasksManager::Expression> AnalyzePredicate(const std::string_view predicate);
+    const std::set<TaskList::Expression> AnalyzePredicate(const std::string_view predicate);
 };

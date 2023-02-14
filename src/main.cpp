@@ -1,8 +1,8 @@
-﻿#include "InputHandler.h"
+﻿#include "CommandHandler.h"
 
 int main()
 {
-	InputHandler inpHandler;
+	CommandHandler cmdHandler;
 
-	return inpHandler.StartReading();
+	return cmdHandler.StartReadingCommands();
 }

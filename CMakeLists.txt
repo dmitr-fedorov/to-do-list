@@ -8,9 +8,9 @@ add_executable(ToDoList
 src/DateTimeUtility.cpp
 src/DateTime.cpp
 src/Task.cpp
-src/TasksManager.cpp
+src/TaskList.cpp
 src/InputAnalysisTools.cpp
-src/InputHandler.cpp
+src/CommandHandler.cpp
 src/main.cpp
 )
 
