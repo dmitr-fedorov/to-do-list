@@ -40,7 +40,7 @@ public:
 private:	
 	std::string m_name;
 	std::string m_description;
+	DateTime    m_dateTime;
 	std::string m_category;
 	std::string m_status;
-	DateTime m_dateTime;	
 };

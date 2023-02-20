@@ -121,10 +121,15 @@ void CommandHandler::HandleAdd(const std::string_view arguments)
 
 void CommandHandler::HandleDone(const std::string_view taskName)
 {
-	const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
-
 	try
 	{
+		if (taskName.empty())
+		{
+			throw "You should provide arguments for the command!";
+		}
+
+		const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
+
 		if (!m_taskList.Contains(unquotedName))
 		{
 			throw "This task does not exist!";
@@ -143,6 +148,11 @@ void CommandHandler::HandleUpdate(const std::string_view taskName)
 {
 	try
 	{
+		if (taskName.empty())
+		{
+			throw "You should provide arguments for the command!";
+		}
+
 		const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
 
 		if (!m_taskList.Contains(unquotedName))
@@ -179,10 +189,15 @@ void CommandHandler::HandleUpdate(const std::string_view taskName)
 
 void CommandHandler::HandleDelete(const std::string_view taskName)
 {
-	const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
-
 	try
 	{
+		if (taskName.empty())
+		{
+			throw "You should provide arguments for the command!";
+		}
+
+		const auto unquotedName{ InputAnalysisTools::Unquoted(taskName) };
+
 		if (!m_taskList.Contains(unquotedName))
 		{
 			throw "This task does not exist!";
@@ -353,4 +368,6 @@ DateTime CommandHandler::ReadDateTime()
 			continue;
 		}
 	}
+
+	return DateTime( inputLine );
 }

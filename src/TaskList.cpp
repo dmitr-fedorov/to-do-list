@@ -42,7 +42,7 @@ void TaskList::Replace(const std::string_view oldName, const std::string_view ne
 		return;
 	}
 
-	m_tasks.erase(std::string(oldName));
+	m_tasks.erase(it_oldName);
 
 	m_tasks.emplace(newName, Task{ newName, description, dateTime, category });
 }
