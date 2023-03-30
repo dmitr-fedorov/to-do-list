@@ -10,7 +10,12 @@ src/DateTime.cpp
 src/Task.cpp
 src/TaskList.cpp
 src/InputAnalysisTools.cpp
-src/CommandHandler.cpp
+src/CommandAdd.cpp
+src/CommandUpdate.cpp
+src/CommandDelete.cpp
+src/CommandDone.cpp
+src/CommandSelect.cpp
+src/CommandsInvoker.cpp
 src/main.cpp
 )
 
