@@ -21,4 +21,8 @@ private:
 	static const int INDX_CATEGORY = 3;
 	
 	TaskList& m_taskList;
+	
+	void checkFieldsValidity(const std::vector<std::string_view>& fields);
+
+	bool fieldsContainQuotes(const std::vector<std::string_view>& fields);
 };

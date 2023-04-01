@@ -15,9 +15,9 @@ public:
 private:
 	TaskList& m_taskList;
 
-	std::string ReadValueForField(const std::string_view fieldName);
+	std::string readValueForField(const std::string_view fieldName);
 
-	std::string ReadNewNameForTask(const std::string_view taskName);
+	std::string readNewNameForTask(const std::string_view oldTaskName);
 
-	DateTime ReadValueForFieldDate();
+	DateTime readValueForFieldDate();
 };

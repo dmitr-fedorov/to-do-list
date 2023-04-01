@@ -14,23 +14,23 @@ void CommandUpdate::execute(const std::string_view arguments)
 		throw "You should provide arguments for the command!";
 	}
 
-	const auto unquotedName = InputAnalysisTools::Unquoted(arguments);
+	const auto unquotedOldName = InputAnalysisTools::Unquoted(arguments);
 
-	if (!m_taskList.Contains(unquotedName))
+	if (!m_taskList.Contains(unquotedOldName))
 	{
 		throw "This task does not exist!";
 	}
 
 	std::cout << "Please, enter new fields." << '\n';
 
-	const auto newName = ReadNewNameForTask(unquotedName);
-	const auto newDescription = ReadValueForField("description");
-	const auto newDateTime = ReadValueForFieldDate();
-	const auto newCategory = ReadValueForField("category");
+	const auto newName = readNewNameForTask(unquotedOldName);
+	const auto newDescription = readValueForField("description");
+	const auto newDateTime = readValueForFieldDate();
+	const auto newCategory = readValueForField("category");
 
-	if (unquotedName != newName)
+	if (unquotedOldName != newName)
 	{
-		m_taskList.Replace(unquotedName, newName, newDescription,
+		m_taskList.Replace(unquotedOldName, newName, newDescription,
 			newDateTime, newCategory);
 	}
 	else
@@ -39,7 +39,7 @@ void CommandUpdate::execute(const std::string_view arguments)
 	}
 }
 
-std::string CommandUpdate::ReadValueForField(const std::string_view fieldName)
+std::string CommandUpdate::readValueForField(const std::string_view fieldName)
 {
 	std::cout << fieldName << ": ";
 	
@@ -71,19 +71,18 @@ std::string CommandUpdate::ReadValueForField(const std::string_view fieldName)
 	return std::string{ unquotedInputLine };
 }
 
-std::string CommandUpdate::ReadNewNameForTask(const std::string_view taskName)
+std::string CommandUpdate::readNewNameForTask(const std::string_view oldTaskName)
 {
-	const auto unquotedOldName = InputAnalysisTools::Unquoted(taskName);
 	std::string newName;
 	std::string_view unquotedNewName;
 
 	while (true)
 	{
-		newName = ReadValueForField("name");
+		newName = readValueForField("name");
 
 		unquotedNewName = InputAnalysisTools::Unquoted(newName);
 
-		if (unquotedNewName == unquotedOldName)
+		if (unquotedNewName == oldTaskName)
 		{
 			break;
 		}
@@ -91,6 +90,7 @@ std::string CommandUpdate::ReadNewNameForTask(const std::string_view taskName)
 		{
 			std::cout << "This task already exists!" << std::endl;
 			std::cout << "Try again: ";
+
 			continue;
 		}
 
@@ -100,7 +100,7 @@ std::string CommandUpdate::ReadNewNameForTask(const std::string_view taskName)
 	return std::string{ unquotedNewName };
 }
 
-DateTime CommandUpdate::ReadValueForFieldDate()
+DateTime CommandUpdate::readValueForFieldDate()
 {
 	std::cout << "date: ";
 	
@@ -116,6 +116,7 @@ DateTime CommandUpdate::ReadValueForFieldDate()
 		{
 			std::cout << msg << std::endl;
 			std::cout << "Try again: ";
+
 			continue;
 		}
 	}

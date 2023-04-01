@@ -11,6 +11,14 @@ void CommandAdd::execute(const std::string_view arguments)
 {
 	const auto fields = InputAnalysisTools::SplitIntoWords(arguments);
 
+    checkFieldsValidity(fields);
+    
+    m_taskList.Add(fields[INDX_NAME], fields[INDX_DESCRIPTION],
+    	DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY]);
+}
+
+void CommandAdd::checkFieldsValidity(const std::vector<std::string_view>& fields)
+{
     if (fields.size() != REQUIRED_NUMBER_OF_FIELDS)
     {
     	throw "Incorrect number of arguments!";
@@ -21,14 +29,21 @@ void CommandAdd::execute(const std::string_view arguments)
     	throw "This task already exists!";
     }
     
-    for (const std::string_view field : fields)
+    if (fieldsContainQuotes(fields))
+    {
+        throw "Incorrect usage of quotes in arguments!";
+    }
+}
+
+bool CommandAdd::fieldsContainQuotes(const std::vector<std::string_view>& fields)
+{
+    for (const auto field : fields)
     {
     	if (field.find('\"') != std::string_view::npos)
     	{
-    		throw "Incorrect usage of quotes in arguments!";
+            return true;
     	}
     }
-    
-    m_taskList.Add(fields[INDX_NAME], fields[INDX_DESCRIPTION],
-    	DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY]);
+
+    return false;
 }

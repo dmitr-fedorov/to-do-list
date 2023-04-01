@@ -13,51 +13,26 @@ void CommandSelect::execute(const std::string_view arguments)
 	{
 		throw "Task list is empty!";
 	}
+
+	const auto asteriskCharIndx = readFromBeginningUntilAsterisk(arguments);
 	
-	if (m_taskList.Count() == 0)
-	{
-		throw "Task list is empty!";
-	}
+	const auto nextNonBlankCharIndx = arguments.find_first_not_of(" ", asteriskCharIndx + 1);
 
-	const auto indx = arguments.find_first_not_of(" ", 0);
-
-	if (indx == std::string_view::npos)
-	{
-		throw "You should provide arguments for the command!";
-	}
-
-	if (arguments[indx] != '*')
-	{
-		throw "After \'select\' must come the character \'*\'!";
-	}
-
-	const auto indx2 = arguments.find_first_not_of(" ", indx + 1);
-
-	if (indx2 == std::string_view::npos)
+	if (nextNonBlankCharIndx == std::string_view::npos)
 	{
 		m_taskList.DisplayAll();
 
 		return;
 	}
-
-	if (indx2 == indx + 1)
+	
+	if (nextNonBlankCharIndx == asteriskCharIndx + 1)
 	{
 		throw "Characters right after \'*\' are not allowed!";
 	}
 
-	const auto indx3 = arguments.find_first_of(" ", indx2);
+	const auto predicateStartIndx = readFromIndexUntilPredicate(arguments, nextNonBlankCharIndx);
 
-	if (arguments.substr(indx2, indx3 - indx2) != "where")
-	{
-		throw "After \'*\' must come the word \'where\'!";
-	}
-
-	if (indx3 == std::string_view::npos)
-	{
-		throw "Predicate is empty!";
-	}
-
-	const auto predicate = arguments.substr(indx3, arguments.size() - indx3);
+	const auto predicate = arguments.substr(predicateStartIndx, arguments.size() - predicateStartIndx);
 
 	const auto expressions = InputAnalysisTools::AnalyzePredicate(predicate);
 
@@ -74,4 +49,47 @@ void CommandSelect::execute(const std::string_view arguments)
 
 		std::cout << '\n';
 	}
+}
+
+size_t CommandSelect::readFromBeginningUntilAsterisk(const std::string_view arguments)
+{
+	const auto asteriskCharIndx = arguments.find_first_not_of(" ", 0);
+
+	if (asteriskCharIndx == std::string_view::npos)
+	{
+		throw "You should provide arguments for the command!";
+	}
+
+	if (arguments[asteriskCharIndx] != '*')
+	{
+		throw "After \'select\' must come the character \'*\'!";
+	}
+
+	return asteriskCharIndx;
+}
+
+size_t CommandSelect::readFromIndexUntilPredicate(const std::string_view arguments, const size_t startIndx)
+{
+	const auto wordEndIndx = arguments.find_first_of(" ", startIndx);
+
+	const auto word = arguments.substr(startIndx, wordEndIndx - startIndx);
+
+	if (word != "where")
+	{
+		throw "After \'*\' must come the word \'where\'!";
+	}
+	
+	if (wordEndIndx == std::string_view::npos)
+	{
+		throw "Predicate is empty!";
+	}
+
+	const auto predicateStartIndx = arguments.find_first_not_of(" ", wordEndIndx + 1);
+
+	if (predicateStartIndx == std::string_view::npos)
+	{
+		throw "Predicate is empty!";
+	}
+
+	return predicateStartIndx;
 }
