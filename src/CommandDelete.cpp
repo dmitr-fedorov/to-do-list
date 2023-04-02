@@ -16,10 +16,10 @@ void CommandDelete::execute(const std::string_view arguments)
 
 	const auto unquotedName = InputAnalysisTools::Unquoted(arguments);
 
-	if (!m_taskList.Contains(unquotedName))
+	if (!m_taskList.contains(unquotedName))
 	{
 		throw "This task does not exist!";
 	}
 
-	m_taskList.Delete(unquotedName);
+	m_taskList.erase(unquotedName);
 }

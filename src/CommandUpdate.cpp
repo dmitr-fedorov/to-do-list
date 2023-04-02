@@ -16,7 +16,7 @@ void CommandUpdate::execute(const std::string_view arguments)
 
 	const auto unquotedOldName = InputAnalysisTools::Unquoted(arguments);
 
-	if (!m_taskList.Contains(unquotedOldName))
+	if (!m_taskList.contains(unquotedOldName))
 	{
 		throw "This task does not exist!";
 	}
@@ -27,15 +27,16 @@ void CommandUpdate::execute(const std::string_view arguments)
 	const auto newDescription = readValueForField("description");
 	const auto newDateTime = readValueForFieldDate();
 	const auto newCategory = readValueForField("category");
+	
+	const Task newTask{ newName, newDescription, newDateTime, newCategory };
 
 	if (unquotedOldName != newName)
 	{
-		m_taskList.Replace(unquotedOldName, newName, newDescription,
-			newDateTime, newCategory);
+		m_taskList.replace(unquotedOldName, newTask);
 	}
 	else
 	{
-		m_taskList.Update(newName, newDescription, newDateTime, newCategory);
+		m_taskList.update(newTask);
 	}
 }
 
@@ -86,7 +87,7 @@ std::string CommandUpdate::readNewNameForTask(const std::string_view oldTaskName
 		{
 			break;
 		}
-		else if (m_taskList.Contains(unquotedNewName))
+		else if (m_taskList.contains(unquotedNewName))
 		{
 			std::cout << "This task already exists!" << std::endl;
 			std::cout << "Try again: ";

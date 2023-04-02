@@ -9,7 +9,7 @@ CommandSelect::CommandSelect(TaskList& taskList)
 
 void CommandSelect::execute(const std::string_view arguments)
 {
-	if (m_taskList.Count() == 0)
+	if (m_taskList.count() == 0)
 	{
 		throw "Task list is empty!";
 	}
@@ -20,7 +20,7 @@ void CommandSelect::execute(const std::string_view arguments)
 
 	if (nextNonBlankCharIndx == std::string_view::npos)
 	{
-		m_taskList.DisplayAll();
+		m_taskList.displayAll();
 
 		return;
 	}
@@ -36,7 +36,7 @@ void CommandSelect::execute(const std::string_view arguments)
 
 	const auto expressions = InputAnalysisTools::AnalyzePredicate(predicate);
 
-	const auto relevantTasks = m_taskList.Find(expressions);
+	const auto relevantTasks = m_taskList.find(expressions);
 
 	if (relevantTasks.empty())
 	{
@@ -45,7 +45,7 @@ void CommandSelect::execute(const std::string_view arguments)
 
 	for (auto taskPtr : relevantTasks)
 	{
-		taskPtr->Display();
+		std::cout << *taskPtr;
 
 		std::cout << '\n';
 	}

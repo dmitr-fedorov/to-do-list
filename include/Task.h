@@ -2,45 +2,28 @@
 
 #include <string>
 #include <string_view>
+#include <iostream>
 
 #include "DateTime.h"
 
-/*
-  Класс, который представляет собой задачу.
-*/
-class Task
+struct Task
 {
-public:
+	std::string name;
+	std::string description;
+	DateTime dateTime;
+	std::string category;
+	std::string status;
+
 	Task(const std::string_view name, const std::string_view description,
 		const DateTime& dateTime, const std::string_view category);
-	~Task();
 
-	/*
-	  Устанавливает эту задачу в статус выполненной. 
-	*/
-	void SetDone();
+	~Task() = default;
 
-	/*
-	  Присваивает полям этой задачи значения из аргументов.
-	*/
-	void Update(const std::string_view description, const DateTime& dateTime,
-		const std::string_view category);
+	bool nameIs(const std::string_view op, const std::string_view value) const;
+	bool descriptionIs(const std::string_view op, const std::string_view value) const;
+	bool dateTimeIs(const std::string_view op, const DateTime& other) const;
+	bool categoryIs(const std::string_view op, const std::string_view value) const;
+	bool statusIs(const std::string_view op, const std::string_view value) const;
 
-	/*
-	  Выводит эту задачу в консоль.
-	*/
-	void Display() const;
-
-	bool NameIs(const std::string_view op, const std::string_view value) const;
-	bool DescriptionIs(const std::string_view op, const std::string_view value) const;
-	bool DateTimeIs(const std::string_view op, const DateTime& other) const;
-	bool CategoryIs(const std::string_view op, const std::string_view value) const;
-	bool StatusIs(const std::string_view op, const std::string_view value) const;
-
-private:	
-	std::string m_name;
-	std::string m_description;
-	DateTime    m_dateTime;
-	std::string m_category;
-	std::string m_status;
+	friend std::ostream& operator<<(std::ostream& os, const Task& task);
 };

@@ -2,126 +2,120 @@
 
 #include <iostream>
 
-TaskList::TaskList()
+void TaskList::add(const Task& task)
 {
-
+	m_tasks.emplace(task.name, task);
 }
 
-TaskList::~TaskList()
+void TaskList::update(const Task& task)
 {
-
-}
-
-void TaskList::Add(const std::string_view name, const std::string_view description,
-	const DateTime& dateTime, const std::string_view category)
-{
-	m_tasks.emplace(name, Task{ name, description, dateTime, category });
-}
-
-void TaskList::Update(const std::string_view name, const std::string_view description,
-	const DateTime& dateTime, const std::string_view category)
-{
-	const auto it{ m_tasks.find(std::string(name)) };
+	const auto it = m_tasks.find(task.name);
 
 	if (it == m_tasks.end())
 	{
 		return;
 	}
 
-	it->second.Update(description, dateTime, category);
+	it->second.name = task.name;
+	it->second.description = task.description;
+	it->second.dateTime = task.dateTime;
+	it->second.category = task.category;
 }
 
-void TaskList::Replace(const std::string_view oldName, const std::string_view newName,
-	const std::string_view description, const DateTime& dateTime, const std::string_view category)
+void TaskList::replace(const std::string_view oldName, const Task& newTask)
 {	
-	const auto it_oldName{  m_tasks.find(std::string(oldName)) };
-	const auto it_newName{ m_tasks.find(std::string(newName)) };
+	const auto it_oldTask =  m_tasks.find(std::string(oldName));
+	const auto it_newTask = m_tasks.find(newTask.name);
 
-	if (it_oldName == m_tasks.end() || it_newName != m_tasks.end())
+	if (it_oldTask == m_tasks.end() || it_newTask != m_tasks.end())
 	{
 		return;
 	}
 
-	m_tasks.erase(it_oldName);
+	m_tasks.erase(it_oldTask);
 
-	m_tasks.emplace(newName, Task{ newName, description, dateTime, category });
+	m_tasks.emplace(newTask.name, newTask);
 }
 
-void TaskList::Delete(const std::string_view name)
+void TaskList::erase(const std::string_view name)
 {
 	m_tasks.erase(std::string(name));
 }
 
-bool TaskList::Contains(const std::string_view name) const
+bool TaskList::contains(const std::string_view name) const
 {
-	return m_tasks.find(std::string(name)) != m_tasks.end() ? true : false;
+	const auto it = m_tasks.find(std::string(name));
+	
+	bool result = it != m_tasks.end();
+	
+	return result;
 }
 
-void TaskList::SetDone(const std::string_view name)
+void TaskList::setDone(const std::string_view name)
 {	
-	auto it{ m_tasks.find(std::string(name)) };
+	auto it = m_tasks.find(std::string(name));
 
 	if (it == m_tasks.end())
 	{
 		return;
 	}
 	
-	it->second.SetDone();
+	it->second.status = "done";
 }
 
-void TaskList::DisplayAll() const
+void TaskList::displayAll() const
 {
 	for (const auto& containerElement : m_tasks)
 	{
-		containerElement.second.Display();
+		std::cout << containerElement.second;
 
-		std::cout << std::endl;
+		std::cout << '\n';
 	}
 }
 
-int TaskList::Count() const
+int TaskList::count() const
 {
 	return m_tasks.size();
 }
 
 std::vector<const Task*>
-TaskList::Find(const std::set<Expression>& expressions) const
+TaskList::find(const std::set<Expression>& expressions) const
 {
 	std::vector<const Task*> relevantTasks;
 
 	for (const auto& containerElement : m_tasks)
 	{
-		const Task& task{ containerElement.second };
+		const Task& task = containerElement.second;
 
 		for (const auto& expression : expressions)
 		{
-			const std::string_view field  { expression.field };
-			const std::string_view operatr{ expression.operatr };
-			const std::string_view value  { expression.value };
+			const std::string_view field = expression.field;
+			const std::string_view operatr = expression.operatr;
+			const std::string_view value = expression.value;
 
 			if (field == "name")
 			{
-				if (!task.NameIs(operatr, value))
+				if (!task.nameIs(operatr, value))
 					break;
 			}
 			else if (field == "description")
 			{
-				if (!task.DescriptionIs(operatr, value))
+				if (!task.descriptionIs(operatr, value))
 					break;
 			}
 			else if (field == "date")
 			{
-				if (!task.DateTimeIs(operatr, DateTime(value)))
+				if (!task.dateTimeIs(operatr, DateTime(value)))
 					break;
 			}
 			else if (field == "category")
 			{
-				if (!task.CategoryIs(operatr, value))
+				if (!task.categoryIs(operatr, value))
 					break;
 			}
 			else if (field == "status")
 			{
-				if (!task.StatusIs(operatr, value))
+				if (!task.statusIs(operatr, value))
 					break;
 			}
 			else

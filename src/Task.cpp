@@ -4,67 +4,41 @@
 
 Task::Task(const std::string_view name, const std::string_view description,
 	const DateTime& dateTime, const std::string_view category)
-	: m_name(name), m_description(description), m_dateTime(dateTime), m_category(category), m_status("on")
+	: name(name), description(description), dateTime(dateTime), category(category), status("on")
 {
 	
 }
 
-Task::~Task()
-{
-
-}
-
-void Task::SetDone()
-{
-	m_status = "done";
-}
-
-void Task::Update(const std::string_view description, const DateTime& dateTime, const std::string_view category)
-{
-	m_description = description;
-	m_dateTime = dateTime;
-	m_category = category;
-}
-
-void Task::Display() const
-{
-	std::cout << "name       : " << m_name        << '\n';
-	std::cout << "description: " << m_description << '\n';
-	std::cout << "date       : " << m_dateTime    << '\n';
-	std::cout << "category   : " << m_category    << '\n';
-	std::cout << "status     : " << m_status      << '\n';
-}
-
-bool Task::NameIs(const std::string_view op, const std::string_view value) const
+bool Task::nameIs(const std::string_view op, const std::string_view value) const
 {
 	if (op == ">")
 	{
-		if (m_name > value)
+		if (name > value)
 			return true;
 	}
 	else if (op == ">=")
 	{
-		if (m_name >= value)
+		if (name >= value)
 			return true;
 	}
 	else if (op == "=")
 	{
-		if (m_name == value)
+		if (name == value)
 			return true;
 	}
 	else if (op == "<=")
 	{
-		if (m_name <= value)
+		if (name <= value)
 			return true;
 	}
 	else if (op == "<")
 	{
-		if (m_name < value)
+		if (name < value)
 			return true;
 	}
 	else if (op == "like")
 	{
-		if (m_name.find(value) != std::string::npos)
+		if (name.find(value) != std::string::npos)
 			return true;
 	}
 	else
@@ -75,36 +49,36 @@ bool Task::NameIs(const std::string_view op, const std::string_view value) const
 	return false;
 }
 
-bool Task::DescriptionIs(const std::string_view op, const std::string_view value) const
+bool Task::descriptionIs(const std::string_view op, const std::string_view value) const
 {
 	if (op == ">")
 	{
-		if (m_description > value)
+		if (description > value)
 			return true;
 	}
 	else if (op == ">=")
 	{
-		if (m_description >= value)
+		if (description >= value)
 			return true;
 	}
 	else if (op == "=")
 	{
-		if (m_description == value)
+		if (description == value)
 			return true;
 	}
 	else if (op == "<=")
 	{
-		if (m_description <= value)
+		if (description <= value)
 			return true;
 	}
 	else if (op == "<")
 	{
-		if (m_description < value)
+		if (description < value)
 			return true;
 	}
 	else if (op == "like")
 	{
-		if (m_description.find(value) != std::string::npos)
+		if (description.find(value) != std::string::npos)
 			return true;
 	}
 	else
@@ -115,31 +89,31 @@ bool Task::DescriptionIs(const std::string_view op, const std::string_view value
 	return false;
 }
 
-bool Task::DateTimeIs(const std::string_view op, const DateTime& other) const
+bool Task::dateTimeIs(const std::string_view op, const DateTime& other) const
 {
 	if (op == ">")
 	{
-		if (m_dateTime > other)
+		if (dateTime > other)
 			return true;
 	}
 	else if (op == ">=")
 	{
-		if (m_dateTime >= other)
+		if (dateTime >= other)
 			return true;
 	}
 	else if (op == "=")
 	{
-		if (m_dateTime == other)
+		if (dateTime == other)
 			return true;
 	}
 	else if (op == "<=")
 	{
-		if (m_dateTime <= other)
+		if (dateTime <= other)
 			return true;
 	}
 	else if (op == "<")
 	{
-		if (m_dateTime < other)
+		if (dateTime < other)
 			return true;
 	}
 	else
@@ -150,36 +124,36 @@ bool Task::DateTimeIs(const std::string_view op, const DateTime& other) const
 	return false;
 }
 
-bool Task::CategoryIs(const std::string_view op, const std::string_view value) const
+bool Task::categoryIs(const std::string_view op, const std::string_view value) const
 {
 	if (op == ">")
 	{
-		if (m_category > value)
+		if (category > value)
 			return true;
 	}
 	else if (op == ">=")
 	{
-		if (m_category >= value)
+		if (category >= value)
 			return true;
 	}
 	else if (op == "=")
 	{
-		if (m_category == value)
+		if (category == value)
 			return true;
 	}
 	else if (op == "<=")
 	{
-		if (m_category <= value)
+		if (category <= value)
 			return true;
 	}
 	else if (op == "<")
 	{
-		if (m_category < value)
+		if (category < value)
 			return true;
 	}
 	else if (op == "like")
 	{
-		if (m_category.find(value) != std::string::npos)
+		if (category.find(value) != std::string::npos)
 			return true;
 	}
 	else
@@ -190,36 +164,36 @@ bool Task::CategoryIs(const std::string_view op, const std::string_view value) c
 	return false;
 }
 
-bool Task::StatusIs(const std::string_view op, const std::string_view value) const
+bool Task::statusIs(const std::string_view op, const std::string_view value) const
 {
 	if (op == ">")
 	{
-		if (m_status > value)
+		if (status > value)
 			return true;
 	}
 	else if (op == ">=")
 	{
-		if (m_status >= value)
+		if (status >= value)
 			return true;
 	}
 	else if (op == "=")
 	{
-		if (m_status == value)
+		if (status == value)
 			return true;
 	}
 	else if (op == "<=")
 	{
-		if (m_status <= value)
+		if (status <= value)
 			return true;
 	}
 	else if (op == "<")
 	{
-		if (m_status < value)
+		if (status < value)
 			return true;
 	}
 	else if (op == "like")
 	{
-		if (m_status.find(value) != std::string::npos)
+		if (status.find(value) != std::string::npos)
 			return true;
 	}
 	else
@@ -228,4 +202,15 @@ bool Task::StatusIs(const std::string_view op, const std::string_view value) con
 	}
 
 	return false;
+}
+
+std::ostream& operator<<(std::ostream& os, const Task& task)
+{
+	os << "name       : " << task.name << '\n';
+	os << "description: " << task.description << '\n';
+	os << "date       : " << task.dateTime << '\n';
+	os << "category   : " << task.category << '\n';
+	os << "status     : " << task.status << '\n';
+
+	return os;
 }

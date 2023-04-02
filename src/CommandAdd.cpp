@@ -12,9 +12,11 @@ void CommandAdd::execute(const std::string_view arguments)
 	const auto fields = InputAnalysisTools::SplitIntoWords(arguments);
 
     checkFieldsValidity(fields);
+
+    const Task newTask{ fields[INDX_NAME], fields[INDX_DESCRIPTION],
+                        DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY] };
     
-    m_taskList.Add(fields[INDX_NAME], fields[INDX_DESCRIPTION],
-    	DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY]);
+    m_taskList.add(newTask);
 }
 
 void CommandAdd::checkFieldsValidity(const std::vector<std::string_view>& fields)
@@ -24,7 +26,7 @@ void CommandAdd::checkFieldsValidity(const std::vector<std::string_view>& fields
     	throw "Incorrect number of arguments!";
     }
     
-    if (m_taskList.Contains(fields[INDX_NAME]))
+    if (m_taskList.contains(fields[INDX_NAME]))
     {
     	throw "This task already exists!";
     }
