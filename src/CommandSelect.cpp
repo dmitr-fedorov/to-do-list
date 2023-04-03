@@ -34,7 +34,7 @@ void CommandSelect::execute(const std::string_view arguments)
 
 	const auto predicate = arguments.substr(predicateStartIndx, arguments.size() - predicateStartIndx);
 
-	const auto expressions = InputAnalysisTools::AnalyzePredicate(predicate);
+	const auto expressions = InputAnalysisTools::analyzePredicate(predicate);
 
 	const auto relevantTasks = m_taskList.find(expressions);
 

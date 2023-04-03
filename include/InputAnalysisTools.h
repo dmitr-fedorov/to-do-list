@@ -14,30 +14,11 @@ namespace InputAnalysisTools
         std::string_view arguments;
     };
 
-    /*
-      Если строка line заключена в кавычки, и между кавычек есть хотя бы один символ,
-      то метод возвращает эту строку без кавычек.
-      В противном случае возвращает эту строку без изменений.
-    */
-    std::string_view Unquoted(const std::string_view line);
+    std::string_view unquoted(const std::string_view line);
 
-    /*
-      Делит строку line на две части: команду и аргументы.
-      Возвращает структуру с разделенным вводом.
-    */
-    CommandAndArguments SplitCommandAndArguments(const std::string_view line);
+    CommandAndArguments splitCommandAndArguments(const std::string_view line);
 
-    /*
-      Разделяет строку line на отдельные слова и возвращает контейнер с этими словами.
-      Каждая подстрока, заключенная в кавычки и отделенная от других слов пробелами с обеих сторон,
-      считается одним словом. Такие слова заносятся в контейнер без кавычек в начале и конце.
-    */
-    std::vector<std::string_view> SplitIntoWords(const std::string_view line);
+    std::vector<std::string_view> splitIntoWords(const std::string_view line);
 
-    /*
-      Анализирует предикат predicate и возвращает выражения из этого предиката.
-      Если в функцию был передан некорректный предикат, то выбрасывает
-      исключение const char* с описанием того, какая часть предиката не является корректной.
-    */
-    const std::set<TaskList::Expression> AnalyzePredicate(const std::string_view predicate);
+    const std::set<TaskList::Expression> analyzePredicate(const std::string_view predicate);
 };

@@ -2,288 +2,234 @@
 
 namespace
 {
-	struct WordAndIndex
+	struct WordAndIndexAfterIt
 	{
 		std::string_view word;
 
 		size_t indexAfterWord = std::string_view::npos;
 	};
 
-	struct ExpressionAndIndex
+	struct ExpressionAndIndexAfterIt
 	{
 		TaskList::Expression expression;
 
 		size_t indexAfterExpression = std::string_view::npos;
 	};
 
-	struct FieldNameAndIndex
+	struct FieldNameAndIndexAfterIt
 	{
-		// Имя поля, по которому будет проводиться поиск.
 		std::string_view fieldName;
 
-		// Индекс следующего после имени поля символа в предикате.
 		size_t indexAfterFieldName = std::string_view::npos;
 	};
 
-	struct OperatorAndIndex
+	struct OperatorAndIndexAfterIt
 	{
-		// Оператор, с помощью которого будет проводиться поиск.
 		std::string_view operatr;
 
-		// Индекс следующего после оператора символа в предикате.
 		size_t indexAfterOperator = std::string_view::npos;
 	};
 
-	struct ValueAndIndex
+	struct ValueAndIndexAfterIt
 	{
-		// Значение, по которому будет проводиться поиск.
 		std::string_view value;
 
-		// Индекс следующего после значения символа в предикате.
 		size_t indexAfterValue = std::string_view::npos;
 	};
 
-	/*
-	  Считывает все символы до пробела или до конца строки, начиная с позиции startPos.
-	  Подразумевается, что функция получает корректные данные в качестве аргументов.
-	*/
-	WordAndIndex ReadWord(const std::string_view line, const size_t startPos)
+	WordAndIndexAfterIt readWord(const std::string_view line, const size_t startPos)
 	{
-		const auto end = line.size();
+		const auto lineEndIndx = line.length();
 
-		auto indx = line.find_first_of(' ', startPos + 1);
-		
-		WordAndIndex wordAndIndex;
+		const auto wordEndIndx = line.find_first_of(' ', startPos + 1);
 
-		if (indx != std::string_view::npos)
+		WordAndIndexAfterIt retVal;
+
+		if (wordEndIndx != std::string_view::npos)
 		{
-			wordAndIndex.word = line.substr(startPos, indx - startPos);
-
-			wordAndIndex.indexAfterWord = indx + 1;
+			retVal.word = line.substr(startPos, wordEndIndx - startPos);
+			retVal.indexAfterWord = wordEndIndx;
 		}
 		else
 		{
-			wordAndIndex.word = line.substr(startPos, end - startPos);
-
-			wordAndIndex.indexAfterWord = end;
+			retVal.word = line.substr(startPos, lineEndIndx - startPos);
+			retVal.indexAfterWord = lineEndIndx;
 		}
 
-		return wordAndIndex;
+		return retVal;
 	}
 
-	/*
-	  Начиная с позиции startPos, считывает все символы до пробела,
-	  либо до следующей кавычки, после которой следует пробел.
-	  Подразумевается, что функция получает корректные данные в качестве аргументов.
-	*/
-	WordAndIndex ReadWordWithQuotes(const std::string_view line, const size_t startPos)
+	WordAndIndexAfterIt readWordWithQuotes(const std::string_view line, const size_t startPos)
 	{
-		auto indx = startPos;
-		
-		const auto end = line.size();
-		
-		WordAndIndex wordAndIndex;
+		auto quoteCharIndx = startPos;
 
-		while (indx < end)
+		const auto lineEndIndx = line.length();
+
+		WordAndIndexAfterIt retVal;
+
+		while (quoteCharIndx < lineEndIndx)
 		{
-			indx = line.find_first_of('\"', indx + 1);
+			quoteCharIndx = line.find_first_of('\"', quoteCharIndx + 1);
 
-			if (indx == std::string_view::npos)
+			if (quoteCharIndx == std::string_view::npos)
 			{
-				return ReadWord(line, startPos);
+				return readWord(line, startPos);
 			}
 
-			if (indx == end - 1 || line[indx + 1] == ' ')
+			if (quoteCharIndx == lineEndIndx - 1 || line[quoteCharIndx + 1] == ' ')
 			{
-				wordAndIndex.word = line.substr(startPos + 1, indx - startPos - 1);
-				wordAndIndex.indexAfterWord = indx + 1;
+				retVal.word = line.substr(startPos + 1, quoteCharIndx - startPos - 1);
+				retVal.indexAfterWord = quoteCharIndx + 1;
 
-				return wordAndIndex;
+				return retVal;
 			}
 		}
 
-		return wordAndIndex;
+		return retVal;
 	}
 
-	/*
-	  Считывает название поля из predicate до пробела или до символа-оператора, начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением в случае, если название поля в predicate некорректно.
-	*/
-	FieldNameAndIndex ReadFieldName(const std::string_view predicate, const size_t startPos)
-	{		
-		auto indx = predicate.find_first_not_of(' ', startPos);
+	FieldNameAndIndexAfterIt readFieldName(const std::string_view predicate, const size_t startPos)
+	{
+		const auto nameStartIndx = predicate.find_first_not_of(' ', startPos);
 
-		if (indx == std::string_view::npos)
+		if (nameStartIndx == std::string_view::npos)
 		{
 			throw "Incorrect predicate!";
 		}
 
-		if (predicate[indx] == '<' ||
-			predicate[indx] == '=' ||
-			predicate[indx] == '>')
+		if (predicate[nameStartIndx] == '<' ||
+			predicate[nameStartIndx] == '=' ||
+			predicate[nameStartIndx] == '>')
 		{
 			throw "Operator cannot be the first character in field name!";
 		}
-		
-		const auto end = predicate.size();
 
-		FieldNameAndIndex fieldNameAndIndex;
+		FieldNameAndIndexAfterIt retVal;
 
-		for (auto indx2 = indx; indx2 < end; indx2++)
+		for (auto nameEndIndx = nameStartIndx; nameEndIndx < predicate.length(); nameEndIndx++)
 		{
-			if (predicate[indx2] == '<' || predicate[indx2] == '=' ||
-				predicate[indx2] == '>' || predicate[indx2] == ' ')
+			if (predicate[nameEndIndx] == '<' || predicate[nameEndIndx] == '=' ||
+				predicate[nameEndIndx] == '>' || predicate[nameEndIndx] == ' ')
 			{
-				fieldNameAndIndex.fieldName = predicate.substr(indx, indx2 - indx);
-
-				fieldNameAndIndex.indexAfterFieldName = indx2;
+				retVal.fieldName = predicate.substr(nameStartIndx, nameEndIndx - nameStartIndx);
+				retVal.indexAfterFieldName = nameEndIndx;
 
 				break;
 			}
 		}
 
-		return fieldNameAndIndex;
+		if (retVal.fieldName == "and" || retVal.fieldName == "like")
+		{
+			throw "Incorrect usage of key words in predicate!";
+		}
+
+		return retVal;
 	}
 
-	/*
-	  Считывает оператор из predicate, начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением, если оператор отсутствует,
-	  или если после оператора нет значения.
-	  Возвращает структуру, со считанным оператором и индексом места в predicate,
-	  где заканчивается этот оператор.
-	*/
-	OperatorAndIndex ReadOperator(const std::string_view predicate, const size_t startPos)
+	OperatorAndIndexAfterIt readOperator(const std::string_view predicate, const size_t startPos)
 	{
-		auto indx = predicate.find_first_not_of(' ', startPos);
+		const auto opStartIndx = predicate.find_first_not_of(' ', startPos);
 
-		if (indx == std::string_view::npos)
+		if (opStartIndx == std::string_view::npos)
 		{
 			throw "No operator after field name!";
 		}
 
-		const auto end = predicate.size();
+		OperatorAndIndexAfterIt retVal;
 
-		OperatorAndIndex operatorAndIndex;
-
-		if (predicate[indx] == '<' ||
-			predicate[indx] == '=' ||
-			predicate[indx] == '>')
+		if (predicate[opStartIndx] == '<' ||
+			predicate[opStartIndx] == '=' ||
+			predicate[opStartIndx] == '>')
 		{
-			if (indx == end - 1)
+			if (opStartIndx == predicate.length() - 1)
 			{
 				throw "No value after operator!";
 			}
 
-			if (predicate[indx + 1] == '<' ||
-				predicate[indx + 1] == '=' ||
-				predicate[indx + 1] == '>')
+			if (predicate[opStartIndx + 1] == '<' ||
+				predicate[opStartIndx + 1] == '=' ||
+				predicate[opStartIndx + 1] == '>')
 			{
-				operatorAndIndex.operatr = predicate.substr(indx, 2);
-				operatorAndIndex.indexAfterOperator = indx + 2;
+				retVal.operatr = predicate.substr(opStartIndx, 2);
+				retVal.indexAfterOperator = opStartIndx + 2;
 
-				return operatorAndIndex;
+				return retVal;
 			}
 
-			operatorAndIndex.operatr = predicate.substr(indx, 1);
-			operatorAndIndex.indexAfterOperator = indx + 1;
+			retVal.operatr = predicate.substr(opStartIndx, 1);
+			retVal.indexAfterOperator = opStartIndx + 1;
 
-			return operatorAndIndex;
+			return retVal;
 		}
 
-		auto indx2 = predicate.find_first_of(' ', indx + 1);
+		const auto opEndIndx = predicate.find_first_of(' ', opStartIndx + 1);
 
-		operatorAndIndex.operatr = predicate.substr(indx, indx2 - indx);
-		operatorAndIndex.indexAfterOperator = indx2;
+		retVal.operatr = predicate.substr(opStartIndx, opEndIndx - opStartIndx);
+		retVal.indexAfterOperator = opEndIndx;
 
-		return operatorAndIndex;
+		if (retVal.operatr == "and")
+		{
+			throw "Incorrect usage of key words in predicate!";
+		}
+
+		return retVal;
 	}
 
-	/*
-	  Считывает значение выражения из predicate, начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением в случае, если значение в predicate некорректно.
-	  Возвращает структуру со считанным значением без кавычек с обеих сторон,
-	  и c индексом места в predicate, где заканчивается это значение.
-	*/
-	ValueAndIndex ReadValue(const std::string_view predicate, const size_t startPos)
+	ValueAndIndexAfterIt readValue(const std::string_view predicate, const size_t startPos)
 	{
-		const auto end = predicate.size();
+		const auto valueStartIndx = predicate.find_first_not_of(' ', startPos);
 
-		auto indx = predicate.find_first_not_of(' ', startPos);
-
-		if (indx == std::string_view::npos)
+		if (valueStartIndx == std::string_view::npos)
 		{
 			throw "No value after operator!";
 		}
 
-		auto indx2 = predicate.find_first_of('\"', indx + 1);
+		const auto valueEndIndx = predicate.find_first_of('\"', valueStartIndx + 1);
 
-		if (predicate[indx] != '\"' || indx2 == std::string_view::npos)
+		if (predicate[valueStartIndx] != '\"' || valueEndIndx == std::string_view::npos)
 		{
 			throw "Value after operator must be in quotes!";
 		}
 
-		if (indx2 == indx + 1)
+		if (valueEndIndx == valueStartIndx + 1)
 		{
 			throw "Value in quotes is empty!";
 		}
 
-		if (indx2 < end - 1 && predicate[indx2 + 1] != ' ')
+		if (valueEndIndx < predicate.length() - 1 &&
+			predicate[valueEndIndx + 1] != ' ')
 		{
 			throw "Incorrect usage of quotes in predicate!";
 		}
-		
-		ValueAndIndex valueAndIndex;
 
-		valueAndIndex.value = predicate.substr(indx + 1, indx2 - indx - 1);
+		ValueAndIndexAfterIt retVal;
 
-		valueAndIndex.indexAfterValue = indx2 + 1;
+		retVal.value = predicate.substr(valueStartIndx + 1, valueEndIndx - valueStartIndx - 1);
 
-		return valueAndIndex;
+		retVal.indexAfterValue = valueEndIndx + 1;
+
+		return retVal;
 	}
 
-	/*
-	  Считывает выражение из predicate, начиная с позиции startPos.
-	  Выбрасывает исключение const char* с сообщением в случае,
-	  если после startPos не следует выражение, или выражение содержит некорректные части.
-	  Возвращает считанное выражение.
-	*/
-    ExpressionAndIndex ReadExpression(const std::string_view predicate, const size_t startPos)
+	ExpressionAndIndexAfterIt readExpression(const std::string_view predicate, const size_t startPos)
 	{
-		ExpressionAndIndex expressionAndIndex;
+		const auto resFieldName = readFieldName(predicate, startPos);
+		const auto resOperator = readOperator(predicate, resFieldName.indexAfterFieldName);
+		const auto resValue = readValue(predicate, resOperator.indexAfterOperator);
 
-		auto indx = startPos;
+		ExpressionAndIndexAfterIt retVal;
 
-		const auto resFieldName{ ReadFieldName(predicate, indx) };
+        retVal.expression.field = resFieldName.fieldName;
+		retVal.expression.operatr = resOperator.operatr;
+		retVal.expression.value = resValue.value;
+		retVal.indexAfterExpression = resValue.indexAfterValue;
 
-		if (resFieldName.fieldName == "and" || resFieldName.fieldName == "like")
-		{
-			throw "Incorrect usage of key words in predicate!";
-		}
-
-		expressionAndIndex.expression.field = resFieldName.fieldName;
-		indx = resFieldName.indexAfterFieldName;
-
-		const auto resOperator{ ReadOperator(predicate, indx) };
-
-		if (resOperator.operatr == "and")
-		{
-			throw "Incorrect usage of key words in predicate!";
-		}
-
-		expressionAndIndex.expression.operatr = resOperator.operatr;
-		indx = resOperator.indexAfterOperator;
-
-		const auto resValue{ ReadValue(predicate, indx) };
-
-		expressionAndIndex.expression.value = resValue.value;
-		expressionAndIndex.indexAfterExpression = resValue.indexAfterValue;
-
-		return expressionAndIndex;
+		return retVal;
 	}
 };
 
 std::string_view
-InputAnalysisTools::Unquoted(const std::string_view line)
+InputAnalysisTools::unquoted(const std::string_view line)
 {
 	const size_t lineLength = line.length();
 
@@ -305,62 +251,65 @@ InputAnalysisTools::Unquoted(const std::string_view line)
 }
 
 InputAnalysisTools::CommandAndArguments
-InputAnalysisTools::SplitCommandAndArguments(const std::string_view line)
+InputAnalysisTools::splitCommandAndArguments(const std::string_view line)
 {
-	CommandAndArguments retStruct;
+	CommandAndArguments retVal;
 
-	if (line.empty())
+	const auto commandStartIndx = line.find_first_not_of(' ', 0);
+
+	if (commandStartIndx == std::string_view::npos)
 	{
-		return retStruct;
+		return retVal;
 	}
 
-	size_t indx = 0;
-	size_t indx2 = line.find_first_of(' ', indx);
+	const auto commandEndIndx = line.find_first_of(' ', commandStartIndx);
 
-	if (indx2 == std::string_view::npos)
+	if (commandEndIndx == std::string_view::npos)
 	{
-		retStruct.command = line.substr(indx, line.size());
+		retVal.command = line.substr(commandStartIndx, line.length() - commandStartIndx);
 
-		return retStruct;
+		return retVal;
 	}
 
-	retStruct.command = line.substr(indx, indx2 - indx);
+	retVal.command = line.substr(commandStartIndx, commandEndIndx - commandStartIndx);
 
-	indx = indx2 + 1;
-	indx2 = line.size();
+	const auto argumentsStartIndx = line.find_first_not_of(' ', commandEndIndx);
 
-	retStruct.arguments = line.substr(indx, indx2 - indx);
+	if (argumentsStartIndx == std::string_view::npos)
+	{
+		return retVal;
+	}
 
-	return retStruct;
+	retVal.arguments = line.substr(argumentsStartIndx, line.length());
+
+	return retVal;
 }
 
 std::vector<std::string_view>
-InputAnalysisTools::SplitIntoWords(const std::string_view line)
+InputAnalysisTools::splitIntoWords(const std::string_view line)
 {
 	std::vector<std::string_view> words;
 
-	WordAndIndex resWord;
-	
-	const auto end = line.size();
+	WordAndIndexAfterIt resWord;
 
-	size_t indx = 0;
+	size_t wordStartIndex = 0;
 
-	while (indx < end)
+	while (wordStartIndex < line.length())
 	{
-		indx = line.find_first_not_of(' ', indx);
+		wordStartIndex = line.find_first_not_of(' ', wordStartIndex);
 
-		if (indx == std::string_view::npos)
+		if (wordStartIndex == std::string_view::npos)
 		{
 			break;
 		}
 
-		if (line[indx] == '\"')
+		if (line[wordStartIndex] == '\"')
 		{
-			resWord = ReadWordWithQuotes(line, indx);
+			resWord = readWordWithQuotes(line, wordStartIndex);
 		}
 		else
 		{
-			resWord = ReadWord(line, indx);
+			resWord = readWord(line, wordStartIndex);
 		}
 
 		if (!resWord.word.empty())
@@ -368,22 +317,20 @@ InputAnalysisTools::SplitIntoWords(const std::string_view line)
 			words.push_back(resWord.word);
 		}
 
-		indx = resWord.indexAfterWord;
+		wordStartIndex = resWord.indexAfterWord;
 	}
 
 	return words;
 }
 
 const std::set<TaskList::Expression>
-InputAnalysisTools::AnalyzePredicate(const std::string_view predicate)
+InputAnalysisTools::analyzePredicate(const std::string_view predicate)
 {
-	const auto end = predicate.size();
-
 	std::set<TaskList::Expression> expressions;
 
-	for (size_t indx = 0; indx < end;)
+	for (size_t indx = 0; indx < predicate.length();)
 	{
-		const auto expressionAndIndex{ ReadExpression(predicate, indx) };
+		const auto expressionAndIndex = readExpression(predicate, indx);
 
 		expressions.insert(expressionAndIndex.expression);
 		indx = expressionAndIndex.indexAfterExpression;
@@ -395,14 +342,14 @@ InputAnalysisTools::AnalyzePredicate(const std::string_view predicate)
 			break;
 		}
 
-		const auto wordAndIndex{ ReadWord(predicate, indx) };
+		const auto wordAndIndex = readWord(predicate, indx);
 
 		if (wordAndIndex.word != "and")
 		{
 			throw "To combine expressions, you need to use the word 'and'!";
 		}
 
-		if (wordAndIndex.indexAfterWord == end)
+		if (wordAndIndex.indexAfterWord == predicate.length())
 		{
 			throw "No expression after the word 'and'!";
 		}

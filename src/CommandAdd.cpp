@@ -9,7 +9,7 @@ CommandAdd::CommandAdd(TaskList& taskList)
 
 void CommandAdd::execute(const std::string_view arguments)
 {
-	const auto fields = InputAnalysisTools::SplitIntoWords(arguments);
+	const auto fields = InputAnalysisTools::splitIntoWords(arguments);
 
     checkFieldsValidity(fields);
 

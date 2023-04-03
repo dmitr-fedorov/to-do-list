@@ -14,7 +14,7 @@ void CommandDone::execute(const std::string_view arguments)
 		throw "You should provide arguments for the command!";
 	}
 
-	const auto unquotedName = InputAnalysisTools::Unquoted(arguments);
+	const auto unquotedName = InputAnalysisTools::unquoted(arguments);
 
 	if (!m_taskList.contains(unquotedName))
 	{

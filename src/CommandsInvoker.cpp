@@ -11,7 +11,7 @@ CommandsInvoker::CommandsInvoker(TaskList& taskList)
 void CommandsInvoker::executeCommand(const std::string_view commandAndArgumentsStr)
 {
 	const auto separatedCommandAndArguments =
-		InputAnalysisTools::SplitCommandAndArguments(commandAndArgumentsStr);
+		InputAnalysisTools::splitCommandAndArguments(commandAndArgumentsStr);
 
 	const std::string_view command = separatedCommandAndArguments.command;
 	const std::string_view arguments = separatedCommandAndArguments.arguments;

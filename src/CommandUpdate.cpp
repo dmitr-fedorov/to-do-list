@@ -14,7 +14,7 @@ void CommandUpdate::execute(const std::string_view arguments)
 		throw "You should provide arguments for the command!";
 	}
 
-	const auto unquotedOldName = InputAnalysisTools::Unquoted(arguments);
+	const auto unquotedOldName = InputAnalysisTools::unquoted(arguments);
 
 	if (!m_taskList.contains(unquotedOldName))
 	{
@@ -49,7 +49,7 @@ std::string CommandUpdate::readValueForField(const std::string_view fieldName)
 
 	while (std::getline(std::cin, inputLine, '\n'))
 	{
-		unquotedInputLine = InputAnalysisTools::Unquoted(inputLine);
+		unquotedInputLine = InputAnalysisTools::unquoted(inputLine);
 
 		if (unquotedInputLine.empty())
 		{
@@ -81,7 +81,7 @@ std::string CommandUpdate::readNewNameForTask(const std::string_view oldTaskName
 	{
 		newName = readValueForField("name");
 
-		unquotedNewName = InputAnalysisTools::Unquoted(newName);
+		unquotedNewName = InputAnalysisTools::unquoted(newName);
 
 		if (unquotedNewName == oldTaskName)
 		{
@@ -111,7 +111,7 @@ DateTime CommandUpdate::readValueForFieldDate()
 	{
 		try
 		{			
-			return DateTime{ InputAnalysisTools::Unquoted(inputLine) };
+			return DateTime{ InputAnalysisTools::unquoted(inputLine) };
 		}
 		catch (const char* msg)
 		{
