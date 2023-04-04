@@ -2,84 +2,114 @@
 
 #include <cctype>
 
-bool DateTimeUtility::IsDateTimeFormatCorrect(const std::string_view dateTimeView)
+bool DateTimeUtility::isDateTimeFormatCorrect(const std::string_view dateTimeView)
 {
 	static const int NUM_REQUIRED_CHARACTERS = 16;
 
-	static const int INDX_FIRST_DASH = 4;
-	static const int INDX_SECOND_DASH = 7;
-	static const int INDX_WHITESPACE = 10;
-	static const int INDX_COLON = 13;
+	static const int FIRST_DASH_INDX = 4;
+	static const int SECOND_DASH_INDX = 7;
+	static const int WHITESPACE_INDX = 10;
+	static const int COLON_INDX = 13;
 
-	const int end = dateTimeView.size();
-
-	if (end != NUM_REQUIRED_CHARACTERS)
-		return false;
-
-	for (int i = 0; i < end; i++)
+	if (dateTimeView.length() != NUM_REQUIRED_CHARACTERS)
 	{
-		if (i == INDX_FIRST_DASH || i == INDX_SECOND_DASH)
+		return false;
+	}
+
+	for (size_t i = 0; i < dateTimeView.length(); i++)
+	{
+		if (i == FIRST_DASH_INDX || i == SECOND_DASH_INDX)
 		{
 			if (dateTimeView[i] != '-')
+			{
 				return false;
+			}
 		}
-		else if (i == INDX_WHITESPACE)
+		else if (i == WHITESPACE_INDX)
 		{
 			if (dateTimeView[i] != ' ')
-				return false;
+			{
+			    return false;
+			}
 		}
-		else if (i == INDX_COLON)
+		else if (i == COLON_INDX)
 		{
 			if (dateTimeView[i] != ':')
+			{
 				return false;
+			}
 		}
 		else if (!std::isdigit(dateTimeView[i]))
+		{
 			return false;
+		}
 	}
 
 	return true;
 }
 
-bool DateTimeUtility::IsDateValid(const int year, const int month, const int day)
+bool DateTimeUtility::isDateValid(const int year, const int month, const int day)
 {
-	bool validation = true;
-
-	if (year >= 1900 && year <= 2200)
+	if (year < 1900 || year > 2200)
 	{
-		if (month >= 1 && month <= 12 && day > 0 && day <= 31)
+		return false;
+	}		
+	
+	if (month < 1 || month > 12)
+	{
+		return false;
+	}
+	
+	if (day < 1 || day > 31)
+	{
+		return false;
+	}
+
+	if (month == 4 || month == 6 || month == 9 || month == 11)
+	{
+		if (day > 30)
 		{
-			if (month == 4 || month == 6 || month == 9 || month == 11)
+			return false;
+		}
+	}
+	
+	if (month == 2)
+	{
+		if (isYearLeap(year))
+		{
+			if (day > 29)
 			{
-				if (day > 30)
-					validation = false;
-			}
-			else if (month == 2)
-			{
-				if ((year % 400 == 0 || (year % 100 != 0 && year % 4 == 0)))
-				{
-					if (day > 29)
-						validation = false;
-				}
-				else if (day > 28)
-					validation = false;
+				return false;
 			}
 		}
-		else
-			validation = false;
+		else 
+		{
+			if (day > 28)
+			{
+				return false;
+			}
+		}
 	}
-	else
-		validation = false;
 
-	return validation;
+	return true;
 }
 
-bool DateTimeUtility::IsTimeValid(const int hours, const int minutes)
+bool DateTimeUtility::isYearLeap(const int year)
+{
+	return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));
+}
+
+bool DateTimeUtility::isTimeValid(const int hours, const int minutes)
 {
 	if (hours < 0 || hours > 23)
+	{
 		return false;
+	}
 
 	if (minutes < 0 || minutes > 59)
+	{
 		return false;
+	}
 
 	return true;
 }
