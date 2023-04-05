@@ -332,7 +332,13 @@ InputAnalysisTools::analyzePredicate(const std::string_view predicate)
 	{
 		const auto expressionAndIndex = readExpression(predicate, indx);
 
-		expressions.insert(expressionAndIndex.expression);
+		const auto insertionResult = expressions.insert(expressionAndIndex.expression);
+
+		if (insertionResult.second == false)
+		{
+			throw "You cannot enter one field several times in predicate!";
+		}
+
 		indx = expressionAndIndex.indexAfterExpression;
 
 		indx = predicate.find_first_not_of(' ', indx);
