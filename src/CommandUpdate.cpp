@@ -24,9 +24,9 @@ void CommandUpdate::execute(const std::string_view arguments)
 	std::cout << "Please, enter new fields." << '\n';
 
 	const auto newName = readNewNameForTask(unquotedOldName);
-	const auto newDescription = readValueForField("description");
-	const auto newDateTime = readValueForFieldDate();
-	const auto newCategory = readValueForField("category");
+	const auto newDescription = readValueForFieldDescription();
+	const auto newDateTime = readValueForFieldDate();	
+	const auto newCategory = readValueForFieldCategory();
 	
 	const Task newTask{ newName, newDescription, newDateTime, newCategory };
 
@@ -40,10 +40,39 @@ void CommandUpdate::execute(const std::string_view arguments)
 	}
 }
 
-std::string CommandUpdate::readValueForField(const std::string_view fieldName)
+std::string CommandUpdate::readNewNameForTask(const std::string_view oldTaskName)
 {
-	std::cout << fieldName << ": ";
+	std::string newName;
+	std::string_view unquotedNewName;
 	
+	std::cout << "name: ";
+
+	while (true)
+	{
+		newName = readValue();
+
+		unquotedNewName = InputAnalysisTools::unquoted(newName);
+
+		if (unquotedNewName == oldTaskName)
+		{
+			break;
+		}
+		else if (m_taskList.contains(unquotedNewName))
+		{
+			std::cout << "This task already exists!" << std::endl;
+			std::cout << "Try again: ";
+
+			continue;
+		}
+
+		break;
+	}
+
+	return std::string{ unquotedNewName };
+}
+
+std::string CommandUpdate::readValue()
+{	
 	std::string inputLine;
 	std::string_view unquotedInputLine;
 
@@ -72,33 +101,11 @@ std::string CommandUpdate::readValueForField(const std::string_view fieldName)
 	return std::string{ unquotedInputLine };
 }
 
-std::string CommandUpdate::readNewNameForTask(const std::string_view oldTaskName)
+std::string CommandUpdate::readValueForFieldDescription()
 {
-	std::string newName;
-	std::string_view unquotedNewName;
+	std::cout << "description: ";
 
-	while (true)
-	{
-		newName = readValueForField("name");
-
-		unquotedNewName = InputAnalysisTools::unquoted(newName);
-
-		if (unquotedNewName == oldTaskName)
-		{
-			break;
-		}
-		else if (m_taskList.contains(unquotedNewName))
-		{
-			std::cout << "This task already exists!" << std::endl;
-			std::cout << "Try again: ";
-
-			continue;
-		}
-
-		break;
-	}
-
-	return std::string{ unquotedNewName };
+	return readValue();
 }
 
 DateTime CommandUpdate::readValueForFieldDate()
@@ -123,4 +130,11 @@ DateTime CommandUpdate::readValueForFieldDate()
 	}
 
 	return DateTime(inputLine);
+}
+
+std::string CommandUpdate::readValueForFieldCategory()
+{
+	std::cout << "category: ";
+	
+	return readValue();
 }
