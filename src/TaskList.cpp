@@ -20,6 +20,7 @@ void TaskList::update(const Task& task)
 	it->second.description = task.description;
 	it->second.dateTime = task.dateTime;
 	it->second.category = task.category;
+	it->second.status = task.status;
 }
 
 void TaskList::replace(const std::string_view oldName, const Task& newTask)

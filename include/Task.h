@@ -15,7 +15,7 @@ struct Task
 	std::string status;
 
 	Task(const std::string_view name, const std::string_view description,
-		const DateTime& dateTime, const std::string_view category);
+		const DateTime& dateTime, const std::string_view category, const std::string_view status);
 
 	~Task() = default;
 

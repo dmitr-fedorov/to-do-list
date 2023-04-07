@@ -24,4 +24,6 @@ private:
 	DateTime readValueForFieldDate();
 
 	std::string readValueForFieldCategory();
+
+	std::string readValueForFieldStatus();
 };

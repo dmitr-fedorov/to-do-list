@@ -13,8 +13,11 @@ void CommandAdd::execute(const std::string_view arguments)
 
     checkFieldsValidity(fields);
 
-    const Task newTask{ fields[INDX_NAME], fields[INDX_DESCRIPTION],
-                        DateTime{ fields[INDX_DATE] }, fields[INDX_CATEGORY] };
+    const Task newTask{ fields[INDX_NAME],
+                        fields[INDX_DESCRIPTION],
+                        DateTime{ fields[INDX_DATE] },
+                        fields[INDX_CATEGORY],
+                        "on" };
     
     m_taskList.add(newTask);
 }

@@ -3,8 +3,8 @@
 #include <iostream>
 
 Task::Task(const std::string_view name, const std::string_view description,
-	const DateTime& dateTime, const std::string_view category)
-	: name(name), description(description), dateTime(dateTime), category(category), status("on")
+	const DateTime& dateTime, const std::string_view category, const std::string_view status)
+	: name(name), description(description), dateTime(dateTime), category(category), status(status)
 {
 	
 }

@@ -27,8 +27,9 @@ void CommandUpdate::execute(const std::string_view arguments)
 	const auto newDescription = readValueForFieldDescription();
 	const auto newDateTime = readValueForFieldDate();	
 	const auto newCategory = readValueForFieldCategory();
+	const auto newStatus = readValueForFieldStatus();
 	
-	const Task newTask{ newName, newDescription, newDateTime, newCategory };
+	const Task newTask{ newName, newDescription, newDateTime, newCategory, newStatus };
 
 	if (unquotedOldName != newName)
 	{
@@ -136,5 +137,12 @@ std::string CommandUpdate::readValueForFieldCategory()
 {
 	std::cout << "category: ";
 	
+	return readValue();
+}
+
+std::string CommandUpdate::readValueForFieldStatus()
+{
+	std::cout << "status: ";
+
 	return readValue();
 }
