@@ -74,7 +74,7 @@ void TaskList::displayAll() const
 	}
 }
 
-int TaskList::count() const
+size_t TaskList::count() const
 {
 	return m_tasks.size();
 }
@@ -135,4 +135,19 @@ TaskList::find(const std::set<Expression>& expressions) const
 	}
 
 	return relevantTasks;
+}
+
+std::ofstream& operator<<(std::ofstream& ofs, const TaskList& taskList)
+{
+	for (const auto& [taskName, task] : taskList.m_tasks)
+	{
+		ofs << task;
+
+		if (taskList.m_tasks.find(taskName) != std::prev(taskList.m_tasks.end()))
+		{
+			ofs << '\n';
+		}
+	}
+
+	return ofs;
 }

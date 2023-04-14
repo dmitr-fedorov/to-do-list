@@ -40,9 +40,13 @@ public:
 
 	void displayAll() const;
 
-	int count() const;
+	size_t count() const;
 
 	std::vector<const Task*> find(const std::set<Expression>& expressions) const;
+	
+	TaskList& operator=(TaskList&&) = default;
+
+	friend std::ofstream& operator<<(std::ofstream& ofs, const TaskList& taskList);
 
 private:
 	std::map<std::string, Task> m_tasks;

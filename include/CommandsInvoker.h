@@ -6,6 +6,7 @@
 #include "CommandDelete.h"
 #include "CommandDone.h"
 #include "CommandSelect.h"
+#include "CommandSave.h"
 
 class CommandsInvoker
 {
@@ -24,4 +25,5 @@ private:
 	CommandDelete m_commandDelete;
 	CommandDone m_commandDone;
 	CommandSelect m_commandSelect;
+	CommandSave m_commandSave;
 };

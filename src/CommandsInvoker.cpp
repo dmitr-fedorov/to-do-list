@@ -3,9 +3,10 @@
 
 CommandsInvoker::CommandsInvoker(TaskList& taskList)
 	: m_taskList(taskList), m_commandAdd(taskList), m_commandUpdate(taskList),
-	m_commandDelete(taskList), m_commandDone(taskList), m_commandSelect(taskList)
+	m_commandDelete(taskList), m_commandDone(taskList), m_commandSelect(taskList),
+	m_commandSave(taskList)
 {
-
+	
 }
 
 void CommandsInvoker::executeCommand(const std::string_view commandAndArgumentsStr)
@@ -35,6 +36,10 @@ void CommandsInvoker::executeCommand(const std::string_view commandAndArgumentsS
 	else if (command == "select")
 	{
 		m_commandSelect.execute(arguments);
+	}
+	else if (command == "save")
+	{
+		m_commandSave.execute(arguments);
 	}
 	else
 	{

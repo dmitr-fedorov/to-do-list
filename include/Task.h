@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <iostream>
+#include <fstream>
 
 #include "DateTime.h"
 
@@ -26,4 +27,6 @@ struct Task
 	bool statusIs(const std::string_view op, const std::string_view value) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Task& task);
+
+	friend std::ofstream& operator<<(std::ofstream& ofs, const Task& task);
 };

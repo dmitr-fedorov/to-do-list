@@ -214,3 +214,14 @@ std::ostream& operator<<(std::ostream& os, const Task& task)
 
 	return os;
 }
+
+std::ofstream& operator<<(std::ofstream& ofs, const Task& task)
+{
+	ofs << task.name << '\n';
+	ofs << task.description << '\n';
+	ofs << task.dateTime << '\n';
+	ofs << task.category << '\n';
+	ofs << task.status << '\n';
+
+	return ofs;
+}
