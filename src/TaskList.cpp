@@ -2,6 +2,18 @@
 
 #include <iostream>
 
+bool TaskList::Expression::operator<(const Expression& other) const
+{
+	return field < other.field;
+}
+
+bool TaskList::Expression::operator==(const Expression& other) const
+{
+	return field == other.field &&
+		operatr == other.operatr &&
+		value == other.value;
+}
+
 void TaskList::add(const Task& task)
 {
 	m_tasks.emplace(task.name, task);

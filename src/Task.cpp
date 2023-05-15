@@ -204,6 +204,15 @@ bool Task::statusIs(const std::string_view op, const std::string_view value) con
 	return false;
 }
 
+bool Task::operator==(const Task& other) const
+{
+	return name == other.name &&
+		description == other.description &&
+		dateTime == other.dateTime &&
+		description == other.description &&
+		status == other.status;
+}
+
 std::ostream& operator<<(std::ostream& os, const Task& task)
 {
 	os << "name       : " << task.name << '\n';

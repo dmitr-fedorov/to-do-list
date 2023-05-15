@@ -1,27 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(ToDoList)
+project(to-do-list LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(ToDoList
-src/DateTimeUtility.cpp
-src/DateTime.cpp
-src/Task.cpp
-src/TaskList.cpp
-src/TaskStorageFile.cpp
-src/InputAnalysisTools.cpp
-src/CommandAdd.cpp
-src/CommandUpdate.cpp
-src/CommandDelete.cpp
-src/CommandDone.cpp
-src/CommandSelect.cpp
-src/CommandSave.cpp
-src/CommandsInvoker.cpp
-src/main.cpp
-)
+include_directories(include)
 
-target_include_directories(ToDoList PUBLIC
-  src
-  include
-)
+add_subdirectory(src)
+
+enable_testing()
+
+add_subdirectory(tests)

@@ -26,7 +26,7 @@ struct Task
 	bool categoryIs(const std::string_view op, const std::string_view value) const;
 	bool statusIs(const std::string_view op, const std::string_view value) const;
 
+	bool operator==(const Task& other) const;
 	friend std::ostream& operator<<(std::ostream& os, const Task& task);
-
 	friend std::ofstream& operator<<(std::ofstream& ofs, const Task& task);
 };

@@ -16,10 +16,8 @@ public:
 		std::string_view operatr;
 		std::string_view value;
 
-		bool operator<(const Expression& other) const
-		{
-			return field < other.field;
-		}
+		bool operator<(const Expression& other) const;
+		bool operator==(const Expression& other) const;
 	};
 
 	TaskList() = default;
